@@ -10,6 +10,10 @@ namespace StarterAssets
     [RequireComponent(typeof(PlayerInput))]
     public class ThirdPersonController : MonoBehaviour
     {
+        [Header("Flashlight")]
+        public Light flashlight;
+        private bool flashlightOn = false;
+
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
         public float MoveSpeed = 2.0f;
@@ -125,7 +129,7 @@ namespace StarterAssets
         private void Start()
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-            
+
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
@@ -145,6 +149,7 @@ namespace StarterAssets
             JumpAndGravity();
             GroundedCheck();
             Move();
+            ToggleFlashlight();
         }
 
         private void LateUpdate()
@@ -372,6 +377,21 @@ namespace StarterAssets
             if (animationEvent.animatorClipInfo.weight > 0.5f && LandingAudioClip != null)
             {
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+            }
+        }
+
+        private void ToggleFlashlight()
+        {
+            if (Keyboard.current.fKey.wasPressedThisFrame)
+            {
+                Debug.Log("F key pressed");
+            }
+
+            if (Keyboard.current.fKey.wasPressedThisFrame && flashlight != null)
+            {
+                flashlightOn = !flashlightOn;
+                flashlight.enabled = flashlightOn;
+                Debug.Log("Flashlight toggled: " + flashlightOn);
             }
         }
     }
