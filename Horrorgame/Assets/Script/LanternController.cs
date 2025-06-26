@@ -10,6 +10,8 @@ public class LanternController : MonoBehaviour
     private bool isLit = false;
     private bool playerInRange = false;
 
+    public int lanternIndex = 0;
+
     void Start()
     {
         if (lanternLight != null)
@@ -28,9 +30,17 @@ public class LanternController : MonoBehaviour
     {
         if (isLit) return;
 
+        if (!LanternManager.Instance.CanLightLantern(lanternIndex))
+        {
+            Debug.Log("❌ Cannot light lantern " + lanternIndex + " yet");
+            return;
+        }
+
         isLit = true;
         lanternLight.enabled = true;
-        shakeEffect?.TriggerShake(); 
+        shakeEffect?.TriggerShake();
+
+        LanternManager.Instance.OnLanternLit(lanternIndex);
     }
 
     void OnTriggerEnter(Collider other)
