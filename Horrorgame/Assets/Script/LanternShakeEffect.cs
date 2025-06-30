@@ -53,9 +53,9 @@ public class LanternShakeEffect : MonoBehaviour
     {
         if (redOverlayImage != null)
         {
-            Color c = redOverlayImage.color;
-            c.a = alpha;
-            redOverlayImage.color = c;
+            Color color = redOverlayImage.color;
+            color.a = Mathf.Clamp01(alpha);
+            redOverlayImage.color = color;
         }
 
         var cg = redOverlayImage.GetComponent<CanvasGroup>();
@@ -64,5 +64,14 @@ public class LanternShakeEffect : MonoBehaviour
             cg.alpha = alpha;
         }
     }
+
+    public void SetShakePower(float power)
+    {
+        if (perlin != null)
+            perlin.m_AmplitudeGain = power * maxShakeIntensity;
+
+        SetOverlayAlpha(power * maxOverlayAlpha);
+    }
+
 
 }

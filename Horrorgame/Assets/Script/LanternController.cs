@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 public class LanternController : MonoBehaviour
 {
     public Light lanternLight;
-    public LanternShakeEffect shakeEffect;
+    // public LanternShakeEffect shakeEffect;
     private bool isLit = false;
     private bool playerInRange = false;
 
@@ -38,7 +38,7 @@ public class LanternController : MonoBehaviour
 
         isLit = true;
         lanternLight.enabled = true;
-        shakeEffect?.TriggerShake();
+        // shakeEffect?.TriggerShake();
 
         LanternManager.Instance.OnLanternLit(lanternIndex);
     }
