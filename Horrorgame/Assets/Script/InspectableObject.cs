@@ -10,14 +10,9 @@ public class InspectableObject : MonoBehaviour
 
     void Update()
     {
-        if (isPlayerNearby && Keyboard.current.eKey.wasPressedThisFrame)
+        if (isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame && !InspectManager.Instance.IsInspecting())
         {
             InspectManager.Instance.StartInspect(inspectPrefab);
-        }
-
-        else if (Keyboard.current.eKey.wasPressedThisFrame && InspectManager.Instance.IsInspecting())
-        {
-            InspectManager.Instance.EndInspect();
         }
     }
 
