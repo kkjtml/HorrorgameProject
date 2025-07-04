@@ -7,7 +7,7 @@ public class InspectManager : MonoBehaviour
 {
     public static InspectManager Instance;
 
-    public GameObject blackBackground; // Drag UI Panel สีดำใน Inspector
+    public GameObject blackBackground;
 
     [SerializeField] private float zoomSpeed = 1.0f;
     [SerializeField] private float minZoomDistance = 1.0f;
@@ -19,6 +19,12 @@ public class InspectManager : MonoBehaviour
 
     private GameObject currentItem;
     private bool isInspecting = false;
+
+    void Start()
+    {
+        if (blackBackground != null)
+            blackBackground.SetActive(false);
+    }
 
     void Awake()
     {
@@ -88,21 +94,20 @@ public class InspectManager : MonoBehaviour
         keyLight.transform.SetParent(spotlightObj.transform);
         keyLight.transform.position = basePos + Camera.main.transform.forward * 0.6f + Vector3.up * 0.1f;
         Light light1 = keyLight.AddComponent<Light>();
-        light1.type = LightType.Point;
-        light1.intensity = 0.4f;
+        light1.intensity = 0.45f;
         light1.range = 1.2f;
-        light1.color = new Color(1f, 0.95f, 0.9f);
-        light1.shadows = LightShadows.None;
+        light1.color = new Color(1f, 0.97f, 0.92f); // Warm white
+        light1.shadows = LightShadows.Soft;
+        light1.shadowStrength = 0.2f;
 
         // 💡 2. Fill Light (ข้างขวา)
         GameObject fillLight = new GameObject("FillLight");
         fillLight.transform.SetParent(spotlightObj.transform);
         fillLight.transform.position = basePos + Camera.main.transform.right * 0.3f + Vector3.up * 0.05f;
         Light light2 = fillLight.AddComponent<Light>();
-        light2.type = LightType.Point;
-        light2.intensity = 0.25f;
+        light2.intensity = 0.2f;
         light2.range = 1.0f;
-        light2.color = new Color(0.8f, 0.85f, 1f);
+        light2.color = new Color(0.8f, 0.85f, 1f); // Cool tone
         light2.shadows = LightShadows.None;
 
         // ✨ 3. Rim Light (ด้านหลัง)
@@ -110,9 +115,8 @@ public class InspectManager : MonoBehaviour
         rimLight.transform.SetParent(spotlightObj.transform);
         rimLight.transform.position = basePos - Camera.main.transform.forward * 0.4f + Vector3.up * 0.1f;
         Light light3 = rimLight.AddComponent<Light>();
-        light3.type = LightType.Point;
-        light3.intensity = 0.3f;
-        light3.range = 1.0f;
+        light3.intensity = 0.25f;
+        light3.range = 0.8f;
         light3.color = Color.white;
         light3.shadows = LightShadows.None;
 

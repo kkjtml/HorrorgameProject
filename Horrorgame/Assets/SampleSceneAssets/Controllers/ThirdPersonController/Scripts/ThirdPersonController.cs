@@ -148,7 +148,7 @@ namespace StarterAssets
             {
                 return; // ถ้ากำลัง inspect อยู่ หยุดไม่ให้ Update การเคลื่อนไหว
             }
-            
+
             _hasAnimator = TryGetComponent(out _animator);
 
             JumpAndGravity();
@@ -249,19 +249,35 @@ namespace StarterAssets
 
             // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is a move input rotate player when the player is moving
-            if (_input.move != Vector2.zero)
-            {
-                _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
-                                  _mainCamera.transform.eulerAngles.y;
-                float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
-                    RotationSmoothTime);
+            // if (_input.move != Vector2.zero)
+            // {
+            //     _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
+            //                       _mainCamera.transform.eulerAngles.y;
+            //     float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
+            //         RotationSmoothTime);
 
-                // rotate to face input direction relative to camera position
-                transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
-            }
+            //     // rotate to face input direction relative to camera position
+            //     transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+            // }
 
 
-            Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+            // Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+
+            // 🎯 หมุนตัวตามทิศกล้อง
+            float yaw = _mainCamera.transform.eulerAngles.y;
+            Quaternion targetRotation = Quaternion.Euler(0f, yaw, 0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
+
+            // ⭐ ทิศการเดินตามกล้องและ input
+            Vector3 moveInput = new Vector3(_input.move.x, 0, _input.move.y);
+            Vector3 camForward = _mainCamera.transform.forward;
+            Vector3 camRight = _mainCamera.transform.right;
+            camForward.y = 0;
+            camRight.y = 0;
+            camForward.Normalize();
+            camRight.Normalize();
+
+            Vector3 targetDirection = (camForward * moveInput.z + camRight * moveInput.x).normalized;
 
             // move the player
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
