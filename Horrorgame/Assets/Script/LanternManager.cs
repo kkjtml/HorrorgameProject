@@ -16,6 +16,9 @@ public class LanternManager : MonoBehaviour
 
     public bool CanLightLantern(int index)
     {
+        if (!ClueNoteManager.Instance || ClueNoteManager.Instance.IsClueShowing())
+            return false;
+
         return index == nextLanternIndex;
     }
 

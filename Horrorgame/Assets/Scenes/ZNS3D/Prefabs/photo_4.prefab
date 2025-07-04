@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4391095831046127116}
   - component: {fileID: 7019753558046375035}
   - component: {fileID: 6894816772222069469}
-  - component: {fileID: 3405347916660796483}
+  - component: {fileID: 1032050538683754505}
   m_Layer: 0
   m_Name: photo_4
   m_TagString: Untagged
@@ -106,7 +106,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.31196788, y: 0.25367546, z: 0.11859158}
   m_Center: {x: -0.00060684985, y: 0.12487477, z: 0.005476237}
---- !u!114 &3405347916660796483
+--- !u!114 &1032050538683754505
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,7 +115,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 2770028932704306450}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18995ebc941f288449f778528cea5d6d, type: 3}
+  m_Script: {fileID: 11500000, guid: eadf0f813b912c947a5553294a29f837, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inspectPrefab: {fileID: 2770028932704306450}
