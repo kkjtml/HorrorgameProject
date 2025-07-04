@@ -8,9 +8,13 @@ public class QuestManager : MonoBehaviour
 {
     public static QuestManager Instance;
 
-    public TextMeshProUGUI questText;
+    public TextMeshProUGUI mainQuestText;
+    public TextMeshProUGUI subQuestText;
     public GameObject jumpscareObject;
+
     public int totalLanterns = 3;
+    private int currentLanternIndex = 0;
+    private bool hasSeenClueNote = false;
 
     private void Awake()
     {
@@ -20,16 +24,30 @@ public class QuestManager : MonoBehaviour
 
     void Start()
     {
-        UpdateQuestUI(0);
+        mainQuestText.text = "หาทางออกจากบ้าน";
+        subQuestText.text = "สำรวจบ้าน";
+
         if (jumpscareObject != null)
             jumpscareObject.SetActive(false);
     }
 
+    public void OnClueNoteSeen()
+    {
+        hasSeenClueNote = true;
+        currentLanternIndex = 0;
+        subQuestText.text = "จุดตะเกียงดวงที่ 1";
+    }
+
+    public bool HasSeenClueNote() => hasSeenClueNote;
+
     public void OnLanternLit(int index)
     {
+        if (!hasSeenClueNote) return;
+
         if (index + 1 < totalLanterns)
         {
-            UpdateQuestUI(index + 1);
+            currentLanternIndex = index + 1;
+            subQuestText.text = "จุดตะเกียงดวงที่ " + (index + 2);
         }
         else
         {
@@ -37,24 +55,11 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    void UpdateQuestUI(int nextIndex)
-    {
-        if (questText != null)
-        {
-            questText.text = "จุดไฟตะเกียงอันที่ " + (nextIndex + 1).ToString();
-        }
-    }
-
     void TriggerFinalEvent()
     {
-        if (questText != null)
-        {
-            questText.text = "คุณจุดไฟครบแล้ว...";
-        }
-
+        subQuestText.text = "คุณจุดไฟครบแล้ว...";
         if (jumpscareObject != null)
         {
-            // Delay 1.5 วิแล้วโผล่
             Invoke("ShowJumpscare", 1.5f);
         }
     }
@@ -62,6 +67,5 @@ public class QuestManager : MonoBehaviour
     void ShowJumpscare()
     {
         jumpscareObject.SetActive(true);
-        // เสียงกรี๊ด? เล่น animation? กล้อง shake? ใส่เพิ่มได้
     }
 }

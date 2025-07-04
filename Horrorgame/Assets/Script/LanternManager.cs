@@ -19,6 +19,9 @@ public class LanternManager : MonoBehaviour
         if (!ClueNoteManager.Instance || ClueNoteManager.Instance.IsClueShowing())
             return false;
 
+        if (!QuestManager.Instance || !QuestManager.Instance.HasSeenClueNote())
+            return false;
+
         return index == nextLanternIndex;
     }
 

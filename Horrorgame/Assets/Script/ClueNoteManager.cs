@@ -60,12 +60,10 @@ public class ClueNoteManager : MonoBehaviour
         clueUIPanel.SetActive(false);
         isShowing = false;
 
-        // ✅ คืน object กระดาษ
         if (clueObjectInWorld != null)
             clueObjectInWorld.SetActive(true);
 
-        // ✅ เริ่มเควสได้
-        LanternManager.Instance.nextLanternIndex = 0;
+        QuestManager.Instance?.OnClueNoteSeen(); 
 
         StarterAssets.ThirdPersonController player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = true;
