@@ -144,6 +144,11 @@ namespace StarterAssets
 
         private void Update()
         {
+            if (InspectManager.Instance != null && InspectManager.Instance.IsInspecting())
+            {
+                return; // ถ้ากำลัง inspect อยู่ หยุดไม่ให้ Update การเคลื่อนไหว
+            }
+            
             _hasAnimator = TryGetComponent(out _animator);
 
             JumpAndGravity();
