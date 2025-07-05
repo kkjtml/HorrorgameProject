@@ -7,8 +7,9 @@ public class ClueNoteManager : MonoBehaviour
 {
     public static ClueNoteManager Instance;
 
-    public GameObject clueUIPanel;   // UI แสดงกระดาษคำใบ้
-    public GameObject clueObjectInWorld; // กระดาษในโลกจริง
+    public List<GameObject> clueUIPanels;
+    public GameObject clueObjectInWorld;
+    private int currentClueIndex = -1;
     private bool isShowing = false;
 
     private void Awake()
@@ -19,8 +20,10 @@ public class ClueNoteManager : MonoBehaviour
 
     void Start()
     {
-        if (clueUIPanel != null)
-            clueUIPanel.SetActive(false);
+        foreach (var panel in clueUIPanels)
+        {
+            if (panel != null) panel.SetActive(false);
+        }
     }
 
     void Update()
@@ -31,41 +34,42 @@ public class ClueNoteManager : MonoBehaviour
         }
     }
 
-    public void ShowClue()
+    public void ShowClue(int index)
     {
-        if (isShowing) return;
+        if (isShowing || index < 0 || index >= clueUIPanels.Count) return;
 
-        Debug.Log("📝 Showing Clue UI");
-
+        currentClueIndex = index;
         isShowing = true;
-        StartCoroutine(ShowClueDelayed());
+        StartCoroutine(ShowClueDelayed(index));
     }
 
-    private IEnumerator ShowClueDelayed()
+    private IEnumerator ShowClueDelayed(int index)
     {
-        yield return null; // รอ 1 frame ให้แน่ใจว่า UI โหลด
+        yield return null;
 
-        clueUIPanel.SetActive(true);
-
+        clueUIPanels[index].SetActive(true);
         if (clueObjectInWorld != null)
-            clueObjectInWorld.SetActive(false); // ซ่อนไว้ชั่วคราว
+            clueObjectInWorld.SetActive(false);
 
-        // 🔒 ปิดการควบคุมผู้เล่นชั่วคราว
-        StarterAssets.ThirdPersonController player = FindObjectOfType<StarterAssets.ThirdPersonController>();
+        var player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = false;
     }
 
     void CloseClue()
     {
-        clueUIPanel.SetActive(false);
+        int closedIndex = currentClueIndex;
+        if (currentClueIndex >= 0 && currentClueIndex < clueUIPanels.Count)
+            clueUIPanels[currentClueIndex].SetActive(false);
+
         isShowing = false;
+        currentClueIndex = -1;
 
-        if (clueObjectInWorld != null)
-            clueObjectInWorld.SetActive(true);
+        if (closedIndex == 0 && clueObjectInWorld != null)
+            clueObjectInWorld.SetActive(false);
 
-        QuestManager.Instance?.OnClueNoteSeen(); 
+        QuestManager.Instance?.OnClueNoteClosed(closedIndex);
 
-        StarterAssets.ThirdPersonController player = FindObjectOfType<StarterAssets.ThirdPersonController>();
+        var player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = true;
     }
 

@@ -38,7 +38,7 @@ public class LanternController : MonoBehaviour
         isLit = true;
         lanternLight.enabled = true;
 
-        LanternManager.Instance.OnLanternLit(lanternIndex);
+        LanternManager.Instance.LightLantern(lanternIndex);
     }
 
     void OnTriggerEnter(Collider other)

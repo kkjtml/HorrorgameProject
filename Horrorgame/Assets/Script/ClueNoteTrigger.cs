@@ -5,14 +5,19 @@ using UnityEngine.InputSystem;
 
 public class ClueNoteTrigger : MonoBehaviour
 {
+    public int clueIndex = 0;
     private bool isPlayerNearby = false;
 
     void Update()
     {
         if (isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame && !ClueNoteManager.Instance.IsClueShowing())
         {
-            Debug.Log("🔍 Player clicked to read clue");
-            ClueNoteManager.Instance.ShowClue();
+            if (clueIndex == 0 && QuestManager.Instance != null && QuestManager.Instance.HasFinishedLanternQuest())
+            {
+                Debug.Log("🚫 Clue 0 is disabled after lantern quest is done.");
+                return;
+            }
+            ClueNoteManager.Instance.ShowClue(clueIndex);
         }
     }
 

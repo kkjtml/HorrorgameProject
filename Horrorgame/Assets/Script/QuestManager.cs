@@ -10,11 +10,11 @@ public class QuestManager : MonoBehaviour
 
     public TextMeshProUGUI mainQuestText;
     public TextMeshProUGUI subQuestText;
-    public GameObject jumpscareObject;
 
     public int totalLanterns = 3;
     private int currentLanternIndex = 0;
     private bool hasSeenClueNote = false;
+    private bool clue2Triggered = false;
 
     private void Awake()
     {
@@ -26,9 +26,6 @@ public class QuestManager : MonoBehaviour
     {
         mainQuestText.text = "หาทางออกจากบ้าน";
         subQuestText.text = "สำรวจบ้าน";
-
-        if (jumpscareObject != null)
-            jumpscareObject.SetActive(false);
     }
 
     public void OnClueNoteSeen()
@@ -40,7 +37,7 @@ public class QuestManager : MonoBehaviour
 
     public bool HasSeenClueNote() => hasSeenClueNote;
 
-    public void OnLanternLit(int index)
+    public void LightLantern(int index)
     {
         if (!hasSeenClueNote) return;
 
@@ -51,21 +48,41 @@ public class QuestManager : MonoBehaviour
         }
         else
         {
-            TriggerFinalEvent();
+            LightLanternFinish();
         }
     }
 
-    void TriggerFinalEvent()
+    void LightLanternFinish()
     {
         subQuestText.text = "คุณจุดไฟครบแล้ว...";
-        if (jumpscareObject != null)
+
+        if (!clue2Triggered)
         {
-            Invoke("ShowJumpscare", 1.5f);
+            clue2Triggered = true;
+            Invoke(nameof(ShowSecondClue), 1.5f);
         }
     }
 
-    void ShowJumpscare()
+    public bool HasFinishedLanternQuest()
     {
-        jumpscareObject.SetActive(true);
+        return clue2Triggered; 
     }
+
+    void ShowSecondClue()
+    {
+        ClueNoteManager.Instance?.ShowClue(1);
+    }
+
+    public void OnClueNoteClosed(int clueIndex)
+    {
+        if (clueIndex == 0 && !hasSeenClueNote)
+        {
+            OnClueNoteSeen();
+        }
+        else if (clueIndex == 1)
+        {
+            subQuestText.text = "ตามหารูปภาพปริศนา";
+        }
+    }
+
 }

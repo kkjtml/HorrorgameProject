@@ -25,14 +25,14 @@ public class LanternManager : MonoBehaviour
         return index == nextLanternIndex;
     }
 
-    public void OnLanternLit(int index)
+    public void LightLantern(int index)
     {
         if (index == nextLanternIndex)
         {
             nextLanternIndex++;
             Debug.Log("✅ Lantern " + index + " lit successfully");
 
-            QuestManager.Instance?.OnLanternLit(index);
+            QuestManager.Instance?.LightLantern(index);
         }
         else
         {
