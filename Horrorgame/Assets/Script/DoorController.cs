@@ -3,16 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public enum DoorUnlockCondition
+{
+    AfterLantern2,
+    AfterMysteryPhotoQuest
+}
+
 public class DoorController : MonoBehaviour
 {
     public Transform doorTransform;
-    // public Collider doorCollider;
     public Vector3 openRotationOffset = new Vector3(0, -90, 0);
     public float openSpeed = 2f;
 
     private bool isPlayerNearby = false;
     private bool isOpen = false;
     private bool isUnlocked = false;
+
+    public DoorUnlockCondition unlockCondition;
 
     private Quaternion closedRotation; // Y = 90
     private Quaternion openRotation;   // Y = 0 (หรือ 180 ถ้าเปลี่ยน)
@@ -27,21 +34,26 @@ public class DoorController : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current.rKey.wasPressedThisFrame)
+        if (!isUnlocked)
         {
-            Debug.Log("🔁 [TEST] force open");
-            if (!isOpen) ToggleDoor();
-        }
+            switch (unlockCondition)
+            {
+                case DoorUnlockCondition.AfterLantern2:
+                    if (LanternManager.Instance != null && LanternManager.Instance.nextLanternIndex > 1)
+                    {
+                        isUnlocked = true;
+                        Debug.Log("✅ ปลดล็อกเพราะจุดตะเกียงดวงที่ 2 แล้ว");
+                    }
+                    break;
 
-        if (!isUnlocked && LanternManager.Instance != null && LanternManager.Instance.nextLanternIndex > 0)
-        {
-            isUnlocked = true;
-            Debug.Log("✅ ประตูสามารถเปิดได้หลังจุดตะเกียงดวงที่ 1!");
-        }
-
-        if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            Debug.Log("🖱️ Left Click pressed");
+                case DoorUnlockCondition.AfterMysteryPhotoQuest:
+                    if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingForMysteryPhoto())
+                    {
+                        isUnlocked = true;
+                        Debug.Log("✅ ปลดล็อกเพราะเริ่มเควสภาพปริศนาแล้ว");
+                    }
+                    break;
+            }
         }
 
         if (isUnlocked && isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
@@ -49,7 +61,8 @@ public class DoorController : MonoBehaviour
             ToggleDoor();
         }
 
-        doorTransform.localRotation = Quaternion.Slerp(doorTransform.localRotation, targetRotation, Time.deltaTime * openSpeed);
+        doorTransform.localRotation = Quaternion.Slerp(
+            doorTransform.localRotation, targetRotation, Time.deltaTime * openSpeed);
     }
 
     void ToggleDoor()

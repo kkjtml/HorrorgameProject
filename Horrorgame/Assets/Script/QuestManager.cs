@@ -65,7 +65,7 @@ public class QuestManager : MonoBehaviour
 
     public bool HasFinishedLanternQuest()
     {
-        return clue2Triggered; 
+        return clue2Triggered;
     }
 
     void ShowSecondClue()
@@ -84,5 +84,11 @@ public class QuestManager : MonoBehaviour
             subQuestText.text = "ตามหารูปภาพปริศนา";
         }
     }
+
+    public bool IsSearchingForMysteryPhoto()
+    {
+        return subQuestText != null && subQuestText.text == "ตามหารูปภาพปริศนา";
+    }
+
 
 }
