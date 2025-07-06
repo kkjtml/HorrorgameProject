@@ -60,6 +60,10 @@ public class DoorController : MonoBehaviour
         {
             ToggleDoor();
         }
+        else if (isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            DialogueManager.Instance?.Show("ประตูล็อค ฉันเปิดไม่ได้",1f);
+        }
 
         doorTransform.localRotation = Quaternion.Slerp(
             doorTransform.localRotation, targetRotation, Time.deltaTime * openSpeed);

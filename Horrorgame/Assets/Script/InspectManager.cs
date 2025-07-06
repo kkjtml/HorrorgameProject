@@ -64,7 +64,7 @@ public class InspectManager : MonoBehaviour
         }
     }
 
-    public void StartInspect(GameObject prefabToInspect)
+    public void StartInspect(GameObject prefabToInspect, InspectableItemData itemData = null)
     {
         if (isInspecting || prefabToInspect == null) return;
 
@@ -123,6 +123,17 @@ public class InspectManager : MonoBehaviour
         blackBackground.SetActive(true);
         isInspecting = true;
 
+        // if (itemData != null)
+        // {
+        //     InspectUIManager.Instance?.ShowInspectOptions(itemData);
+
+        //     // ถ้าเป็นโน้ตหรือคำใบ้ → เก็บอัตโนมัติ
+        //     if (itemData.isClueNote)
+        //     {
+        //         InventoryManager.Instance.AddNote(itemData, isClue: true);
+        //     }
+        // }
+
         // 🔒 ปิดการเคลื่อนไหว
         StarterAssets.ThirdPersonController player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = false;
@@ -136,6 +147,8 @@ public class InspectManager : MonoBehaviour
 
         blackBackground.SetActive(false);
         isInspecting = false;
+
+        // InspectUIManager.Instance?.HideInspectOptions();
 
         StarterAssets.ThirdPersonController player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = true;

@@ -19,7 +19,7 @@ public class LanternController : MonoBehaviour
 
     void Update()
     {
-        if (playerInRange && Keyboard.current.eKey.wasPressedThisFrame)
+        if (playerInRange && Mouse.current.leftButton.wasPressedThisFrame)
         {
             ToggleLantern();
         }
@@ -31,6 +31,8 @@ public class LanternController : MonoBehaviour
 
         if (!LanternManager.Instance.CanLightLantern(lanternIndex))
         {
+            DialogueManager.Instance?.Show("จุดตะเกียงไม่ถูกต้อง...", 2f); 
+            DialogueManager.Instance?.Queue("ต้องจุดตะเกียงเรียงทวนเข็มนาฬิกาเท่านั้นสิ", 3f); 
             Debug.Log("❌ Cannot light lantern " + lanternIndex + " yet");
             return;
         }

@@ -24,6 +24,12 @@ public class ClueNoteManager : MonoBehaviour
         {
             if (panel != null) panel.SetActive(false);
         }
+
+        if (!QuestManager.Instance.HasFinishedLanternQuest())
+        {
+            if (clueObjectInWorld != null)
+                clueObjectInWorld.SetActive(true);
+        }
     }
 
     void Update()
@@ -48,8 +54,16 @@ public class ClueNoteManager : MonoBehaviour
         yield return null;
 
         clueUIPanels[index].SetActive(true);
-        if (clueObjectInWorld != null)
-            clueObjectInWorld.SetActive(false);
+
+        if (index == 0)
+        {
+            DialogueManager.Instance?.Show("ฉันต้องจุดตะเกียงเรียงทวนเข็มนาฬิกา", 3f);
+            if (QuestManager.Instance != null && QuestManager.Instance.HasFinishedLanternQuest())
+            {
+                if (clueObjectInWorld != null)
+                    clueObjectInWorld.SetActive(false);
+            }
+        }
 
         var player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = false;
@@ -63,9 +77,6 @@ public class ClueNoteManager : MonoBehaviour
 
         isShowing = false;
         currentClueIndex = -1;
-
-        if (closedIndex == 0 && clueObjectInWorld != null)
-            clueObjectInWorld.SetActive(false);
 
         QuestManager.Instance?.OnClueNoteClosed(closedIndex);
 

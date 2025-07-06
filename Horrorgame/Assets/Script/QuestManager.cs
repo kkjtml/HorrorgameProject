@@ -59,6 +59,14 @@ public class QuestManager : MonoBehaviour
         if (!clue2Triggered)
         {
             clue2Triggered = true;
+
+            // ✅ ลบโน้ตแผ่นแรกในฉากออกไปเลย
+            if (ClueNoteManager.Instance != null && ClueNoteManager.Instance.clueObjectInWorld != null)
+            {
+                ClueNoteManager.Instance.clueObjectInWorld.SetActive(false);
+                Debug.Log("🗑️ ลบ clueObjectInWorld แล้วหลังจุดตะเกียงครบ");
+            }
+
             Invoke(nameof(ShowSecondClue), 1.5f);
         }
     }
