@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 806231673858550958}
   - component: {fileID: 4670150317084929850}
   - component: {fileID: 5552004096728563993}
-  - component: {fileID: 9215390665226708322}
+  - component: {fileID: 1021499508033721599}
   m_Layer: 0
   m_Name: photo_3
   m_TagString: Untagged
@@ -106,7 +106,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.35540965, y: 0.26266193, z: 0.12208678}
   m_Center: {x: -0.0021251293, y: 0.1289067, z: 0.0037797247}
---- !u!114 &9215390665226708322
+--- !u!114 &1021499508033721599
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,7 +115,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4273206861078308040}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18995ebc941f288449f778528cea5d6d, type: 3}
+  m_Script: {fileID: 11500000, guid: 4ad9d4593198dc84cbef50da911fc728, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inspectPrefab: {fileID: 4273206861078308040}
+  prefabToInspect: {fileID: 919132149155446097, guid: d2f43a876affc684c89d8cf387e78d5b, type: 3}
+  condition: 0
+  dialogueLines:
+  - "\u0E40\u0E2B\u0E21\u0E37\u0E2D\u0E19\u0E08\u0E30\u0E40\u0E1B\u0E47\u0E19\u0E20\u0E32\u0E1E\u0E18\u0E23\u0E23\u0E21\u0E14\u0E32"

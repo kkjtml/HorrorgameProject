@@ -24,7 +24,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler
         {
             if (itemData != null && itemData.inspectPrefab != null)
             {
-                InspectManager.Instance.StartInspect(itemData.inspectPrefab);
+                // InspectManager.Instance.StartInspect(itemData.inspectPrefab);
             }
         }
     }

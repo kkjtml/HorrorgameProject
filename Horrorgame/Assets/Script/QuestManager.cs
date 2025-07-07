@@ -16,6 +16,12 @@ public class QuestManager : MonoBehaviour
     private bool hasSeenClueNote = false;
     private bool clue2Triggered = false;
 
+    private bool hasSeenClue1 = false;
+    private bool hasSeenClue2 = false;
+
+    public bool HasSeenClue1() => hasSeenClue1;
+    public bool HasSeenClue2() => hasSeenClue2;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -83,12 +89,14 @@ public class QuestManager : MonoBehaviour
 
     public void OnClueNoteClosed(int clueIndex)
     {
-        if (clueIndex == 0 && !hasSeenClueNote)
+        if (clueIndex == 0 && !hasSeenClue1)
         {
-            OnClueNoteSeen();
+            hasSeenClue1 = true;
+            OnClueNoteSeen(); // จุดตะเกียง
         }
-        else if (clueIndex == 1)
+        else if (clueIndex == 1 && !hasSeenClue2)
         {
+            hasSeenClue2 = true;
             subQuestText.text = "ตามหารูปภาพปริศนา";
         }
     }

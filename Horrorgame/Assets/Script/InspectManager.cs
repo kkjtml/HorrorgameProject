@@ -3,6 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public enum InspectCondition
+{
+    Always,             // ดูได้ตลอดเวลา
+    AfterClue1,         // ต้องเห็น clue 1 (จุดตะเกียง)
+    AfterClue2,         // ต้องเห็น clue 2 (ภาพปริศนา)
+    AfterLanternDone    // ต้องจุดตะเกียงครบ
+}
+
 public class InspectManager : MonoBehaviour
 {
     public static InspectManager Instance;
@@ -15,8 +23,7 @@ public class InspectManager : MonoBehaviour
     private float currentZoom = 1.0f; // เริ่มต้นที่ขนาดปกติ
 
     private GameObject spotlightObj;
-    private Light spotlight;
-
+    private GameObject originalItem;  // ✅ เก็บของจริงที่กด
     private GameObject currentItem;
     private bool isInspecting = false;
 
@@ -45,16 +52,15 @@ public class InspectManager : MonoBehaviour
                 currentItem.transform.Rotate(Camera.main.transform.right, rotY, Space.World);
             }
 
-            // 🔍 ซูมด้วย Scroll Wheel (เปลี่ยนเป็นเลื่อนเข้า-ออก)
-            float scroll = Mouse.current.scroll.ReadValue().y;
-            if (Mathf.Abs(scroll) > 0.01f)
-            {
-                currentZoom -= scroll * zoomSpeed * 0.01f;
-                currentZoom = Mathf.Clamp(currentZoom, minZoomDistance, maxZoomDistance);
+            // // 🔍 ซูมด้วย Scroll Wheel (เปลี่ยนเป็นเลื่อนเข้า-ออก)
+            // float scroll = Mouse.current.scroll.ReadValue().y;
+            // if (Mathf.Abs(scroll) > 0.01f)
+            // {
+            //     currentZoom -= scroll * zoomSpeed * 0.01f;
+            //     currentZoom = Mathf.Clamp(currentZoom, minZoomDistance, maxZoomDistance);
 
-                Vector3 zoomPos = Camera.main.transform.position + Camera.main.transform.forward * currentZoom;
-                currentItem.transform.position = zoomPos;
-            }
+            //     UpdateZoomPosition();
+            // }
 
             // ✅ คลิกขวาออกจาก Inspect
             if (Mouse.current.rightButton.wasPressedThisFrame)
@@ -64,20 +70,27 @@ public class InspectManager : MonoBehaviour
         }
     }
 
-    public void StartInspect(GameObject prefabToInspect, InspectableItemData itemData = null)
+    public void StartInspect(GameObject prefabToInspect, GameObject originalSource = null)
     {
         if (isInspecting || prefabToInspect == null) return;
 
-        currentZoom = 1.0f;
+        // ✅ บันทึกของจริงใน scene เพื่อซ่อนตอน inspect
+        if (originalSource != null && originalSource.scene.IsValid())
+        {
+            originalItem = originalSource;
+            originalItem.SetActive(false);
+        }
 
         // ✅ วาง object หน้า camera
         Vector3 camForward = Camera.main.transform.forward;
         Vector3 camPosition = Camera.main.transform.position;
-        Vector3 spawnPos = camPosition + camForward * 1.0f;
+        currentZoom = maxZoomDistance;
+        Vector3 spawnPos = Camera.main.transform.position + Camera.main.transform.forward * 0.1f;
+
         Quaternion lookAtCam = Quaternion.LookRotation(-camForward);
 
         currentItem = Instantiate(prefabToInspect, spawnPos, lookAtCam);
-        currentItem.transform.localScale *= 1.5f; // ขยายวัตถุ 2.5 เท่า
+        UpdateZoomPosition();
 
         // ❌ ป้องกัน object ชนกับฉาก
         Collider col = currentItem.GetComponentInChildren<Collider>();
@@ -88,55 +101,48 @@ public class InspectManager : MonoBehaviour
         spotlightObj.transform.SetParent(Camera.main.transform);
 
         Vector3 basePos = currentItem.transform.position;
-
-        // 🔆 1. Key Light (ด้านหน้า)
-        GameObject keyLight = new GameObject("KeyLight");
-        keyLight.transform.SetParent(spotlightObj.transform);
-        keyLight.transform.position = basePos + Camera.main.transform.forward * 0.6f + Vector3.up * 0.1f;
-        Light light1 = keyLight.AddComponent<Light>();
-        light1.intensity = 0.45f;
-        light1.range = 1.2f;
-        light1.color = new Color(1f, 0.97f, 0.92f); // Warm white
-        light1.shadows = LightShadows.Soft;
-        light1.shadowStrength = 0.2f;
-
-        // 💡 2. Fill Light (ข้างขวา)
-        GameObject fillLight = new GameObject("FillLight");
-        fillLight.transform.SetParent(spotlightObj.transform);
-        fillLight.transform.position = basePos + Camera.main.transform.right * 0.3f + Vector3.up * 0.05f;
-        Light light2 = fillLight.AddComponent<Light>();
-        light2.intensity = 0.2f;
-        light2.range = 1.0f;
-        light2.color = new Color(0.8f, 0.85f, 1f); // Cool tone
-        light2.shadows = LightShadows.None;
-
-        // ✨ 3. Rim Light (ด้านหลัง)
-        GameObject rimLight = new GameObject("RimLight");
-        rimLight.transform.SetParent(spotlightObj.transform);
-        rimLight.transform.position = basePos - Camera.main.transform.forward * 0.4f + Vector3.up * 0.1f;
-        Light light3 = rimLight.AddComponent<Light>();
-        light3.intensity = 0.25f;
-        light3.range = 0.8f;
-        light3.color = Color.white;
-        light3.shadows = LightShadows.None;
+        CreateSpotLights(basePos);
 
         blackBackground.SetActive(true);
         isInspecting = true;
 
-        // if (itemData != null)
-        // {
-        //     InspectUIManager.Instance?.ShowInspectOptions(itemData);
-
-        //     // ถ้าเป็นโน้ตหรือคำใบ้ → เก็บอัตโนมัติ
-        //     if (itemData.isClueNote)
-        //     {
-        //         InventoryManager.Instance.AddNote(itemData, isClue: true);
-        //     }
-        // }
-
         // 🔒 ปิดการเคลื่อนไหว
         StarterAssets.ThirdPersonController player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = false;
+    }
+
+    private void CreateSpotLights(Vector3 basePos)
+    {
+        // Key Light
+        GameObject key = new GameObject("KeyLight");
+        key.transform.SetParent(spotlightObj.transform);
+        key.transform.position = basePos + Camera.main.transform.forward * 0.6f + Vector3.up * 0.1f;
+        var light1 = key.AddComponent<Light>();
+        light1.intensity = 0.45f;
+        light1.range = 1.2f;
+        light1.color = new Color(1f, 0.97f, 0.92f);
+        light1.shadows = LightShadows.Soft;
+        light1.shadowStrength = 0.2f;
+
+        // Fill Light
+        GameObject fill = new GameObject("FillLight");
+        fill.transform.SetParent(spotlightObj.transform);
+        fill.transform.position = basePos + Camera.main.transform.right * 0.3f + Vector3.up * 0.05f;
+        var light2 = fill.AddComponent<Light>();
+        light2.intensity = 0.2f;
+        light2.range = 1.0f;
+        light2.color = new Color(0.8f, 0.85f, 1f);
+        light2.shadows = LightShadows.None;
+
+        // Rim Light
+        GameObject rim = new GameObject("RimLight");
+        rim.transform.SetParent(spotlightObj.transform);
+        rim.transform.position = basePos - Camera.main.transform.forward * 0.4f + Vector3.up * 0.1f;
+        var light3 = rim.AddComponent<Light>();
+        light3.intensity = 0.25f;
+        light3.range = 0.8f;
+        light3.color = Color.white;
+        light3.shadows = LightShadows.None;
     }
 
     public void EndInspect()
@@ -145,14 +151,28 @@ public class InspectManager : MonoBehaviour
 
         if (spotlightObj != null) Destroy(spotlightObj);
 
+        // ✅ เปิดของจริงกลับมา
+        if (originalItem != null)
+        {
+            originalItem.SetActive(true);
+            originalItem = null;
+        }
+
         blackBackground.SetActive(false);
         isInspecting = false;
-
-        // InspectUIManager.Instance?.HideInspectOptions();
 
         StarterAssets.ThirdPersonController player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = true;
     }
 
     public bool IsInspecting() => isInspecting;
+
+    private void UpdateZoomPosition()
+    {
+        if (currentItem == null) return;
+
+        Vector3 zoomPos = Camera.main.transform.position + Camera.main.transform.forward * currentZoom;
+        currentItem.transform.position = zoomPos;
+    }
+
 }
