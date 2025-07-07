@@ -29,16 +29,30 @@ public class LanternController : MonoBehaviour
     {
         if (isLit) return;
 
+        // ตรวจว่ากำลังดู Clue อยู่ → ห้ามจุด
+        if (ClueNoteManager.Instance != null && ClueNoteManager.Instance.IsClueShowing())
+            return;
+
+        // 🟥 ยังไม่ได้อ่านโน้ต Clue 0
+        if (!QuestManager.Instance.HasSeenClueNote())
+        {
+            DialogueManager.Instance?.Show("ดูเหมือนจะเป็นตะเกียงเก่าๆ", 2f);
+            return;
+        }
+
+        // ✅ อ่านโน้ตแล้ว แต่จุดผิดดวง
         if (!LanternManager.Instance.CanLightLantern(lanternIndex))
         {
-            DialogueManager.Instance?.Show("จุดตะเกียงไม่ถูกต้อง...", 2f); 
-            DialogueManager.Instance?.Queue("ต้องจุดตะเกียงเรียงทวนเข็มนาฬิกาเท่านั้นสิ", 3f); 
+            DialogueManager.Instance?.Show("จุดตะเกียงไม่ถูกต้อง...", 2f);
+            DialogueManager.Instance?.Queue("ต้องจุดตะเกียงเรียงทวนเข็มนาฬิกาเท่านั้นสิ", 3f);
             Debug.Log("❌ Cannot light lantern " + lanternIndex + " yet");
             return;
         }
 
         isLit = true;
         lanternLight.enabled = true;
+
+        DialogueManager.Instance?.Show("จุดตะเกียงถูกต้องแล้ว", 2f);
 
         LanternManager.Instance.LightLantern(lanternIndex);
     }

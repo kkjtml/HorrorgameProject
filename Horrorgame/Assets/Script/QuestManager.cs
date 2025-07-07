@@ -54,7 +54,7 @@ public class QuestManager : MonoBehaviour
 
     void LightLanternFinish()
     {
-        subQuestText.text = "คุณจุดไฟครบแล้ว...";
+        subQuestText.text = "จุดไฟครบแล้ว...";
 
         if (!clue2Triggered)
         {
