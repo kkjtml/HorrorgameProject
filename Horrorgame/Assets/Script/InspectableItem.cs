@@ -12,6 +12,9 @@ public class InspectableItem : MonoBehaviour
     public string[] dialogueLines;  // ✅ หลายข้อความ
     private bool isPlayerNearby = false;
 
+    public bool isKey = false;
+    private bool hasCollectedKey = false;
+
     void Update()
     {
         if (isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
@@ -30,6 +33,12 @@ public class InspectableItem : MonoBehaviour
                 {
                     DialogueManager.Instance?.Queue(dialogueLines[i], 2f);
                 }
+            }
+
+            if (isKey && !hasCollectedKey)
+            {
+                hasCollectedKey = true;
+                InspectManager.Instance?.SetKeyItem(this.gameObject);
             }
 
             // ✅ ส่งตัวที่อยู่ใน scene จริงเข้าไปเป็น `originalSource`
@@ -52,6 +61,9 @@ public class InspectableItem : MonoBehaviour
 
             case InspectCondition.AfterLanternDone:
                 return QuestManager.Instance != null && QuestManager.Instance.HasFinishedLanternQuest();
+
+            case InspectCondition.AfterClue3:
+                return QuestManager.Instance != null && QuestManager.Instance.HasSeenClue3();
 
             default:
                 return false;

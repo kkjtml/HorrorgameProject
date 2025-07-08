@@ -6,7 +6,8 @@ using UnityEngine.InputSystem;
 public enum DoorUnlockCondition
 {
     AfterLantern2,
-    AfterMysteryPhotoQuest
+    PuzzlePictureQuest,
+    AfterFoundKey
 }
 
 public class DoorController : MonoBehaviour
@@ -46,11 +47,19 @@ public class DoorController : MonoBehaviour
                     }
                     break;
 
-                case DoorUnlockCondition.AfterMysteryPhotoQuest:
+                case DoorUnlockCondition.PuzzlePictureQuest:
                     if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingForMysteryPhoto())
                     {
                         isUnlocked = true;
                         Debug.Log("✅ ปลดล็อกเพราะเริ่มเควสภาพปริศนาแล้ว");
+                    }
+                    break;
+
+                case DoorUnlockCondition.AfterFoundKey:
+                    if (QuestManager.Instance != null && QuestManager.Instance.HasFoundKey())
+                    {
+                        isUnlocked = true;
+                        Debug.Log("✅ ปลดล็อกเพราะพบกุญแจแล้ว");
                     }
                     break;
             }
@@ -59,10 +68,18 @@ public class DoorController : MonoBehaviour
         if (isUnlocked && isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
         {
             ToggleDoor();
+
+            if (unlockCondition == DoorUnlockCondition.AfterFoundKey)
+            {
+                DialogueManager.Instance?.Show("ฉันออกจากที่นี่ได้แล้ว", 2f);
+
+                // ✅ อัปเดตเควส
+                QuestManager.Instance?.SetEscapeForestQuest();
+            }
         }
         else if (isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
         {
-            DialogueManager.Instance?.Show("ประตูล็อค ฉันเปิดไม่ได้",1f);
+            DialogueManager.Instance?.Show("ประตูล็อค ฉันเปิดไม่ได้", 1f);
         }
 
         doorTransform.localRotation = Quaternion.Slerp(
@@ -82,4 +99,9 @@ public class DoorController : MonoBehaviour
         isPlayerNearby = state;
     }
 
+    public void UnlockManually()
+    {
+        isUnlocked = true;
+        Debug.Log("🔓 ประตูนี้ถูกปลดล็อกด้วยกุญแจ inspect");
+    }
 }

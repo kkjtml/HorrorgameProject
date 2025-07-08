@@ -11,13 +11,18 @@ public class PicturePuzzleTrigger : MonoBehaviour
     {
         if (isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
         {
+            if (PicturePuzzleUI.Instance != null && PicturePuzzleUI.Instance.IsPuzzleCompleted())
+            {
+                return;
+            }
+
             if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingForMysteryPhoto())
             {
                 PicturePuzzleUI.Instance?.OpenPuzzle();
             }
             else
             {
-                DialogueManager.Instance?.Show("ฉันยังไม่รู้ว่าภาพเหล่านี้คืออะไร...");
+                DialogueManager.Instance?.Show("ฉันยังไม่รู้ว่าภาพเหล่านี้คืออะไร...", 2f);
             }
         }
     }

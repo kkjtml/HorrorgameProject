@@ -7,8 +7,9 @@ public enum InspectCondition
 {
     Always,             // ดูได้ตลอดเวลา
     AfterClue1,         // ต้องเห็น clue 1 (จุดตะเกียง)
-    AfterClue2,         // ต้องเห็น clue 2 (ภาพปริศนา)
-    AfterLanternDone    // ต้องจุดตะเกียงครบ
+    AfterClue2,         // ต้องเห็น clue 2 (เรียงภาพ)
+    AfterLanternDone,    // ต้องจุดตะเกียงครบ
+    AfterClue3 // ต้องเห็น clue 3 (ตามหากุญแจ)
 }
 
 public class InspectManager : MonoBehaviour
@@ -26,6 +27,7 @@ public class InspectManager : MonoBehaviour
     private GameObject originalItem;  // ✅ เก็บของจริงที่กด
     private GameObject currentItem;
     private bool isInspecting = false;
+    private GameObject keyItemInWorld = null;
 
     void Start()
     {
@@ -158,6 +160,15 @@ public class InspectManager : MonoBehaviour
             originalItem = null;
         }
 
+        if (keyItemInWorld != null)
+        {
+            DialogueManager.Instance?.Show("เก็บกุญแจแล้ว นำไปปลดล็อคประตู", 3f);
+            QuestManager.Instance?.OnFoundKey();
+
+            Destroy(keyItemInWorld); // ❌ ทำให้กุญแจในฉากหาย
+            keyItemInWorld = null;
+        }
+
         blackBackground.SetActive(false);
         isInspecting = false;
 
@@ -175,4 +186,8 @@ public class InspectManager : MonoBehaviour
         currentItem.transform.position = zoomPos;
     }
 
+    public void SetKeyItem(GameObject obj)
+    {
+        keyItemInWorld = obj;
+    }
 }

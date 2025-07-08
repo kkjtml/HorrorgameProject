@@ -18,9 +18,14 @@ public class QuestManager : MonoBehaviour
 
     private bool hasSeenClue1 = false;
     private bool hasSeenClue2 = false;
+    private bool hasSeenClue3 = false;
 
     public bool HasSeenClue1() => hasSeenClue1;
     public bool HasSeenClue2() => hasSeenClue2;
+    public bool HasSeenClue3() => hasSeenClue3;
+
+    private bool hasFoundKey = false;
+    public bool HasFoundKey() => hasFoundKey;
 
     private void Awake()
     {
@@ -99,11 +104,32 @@ public class QuestManager : MonoBehaviour
             hasSeenClue2 = true;
             subQuestText.text = "ตามหารูปภาพปริศนา";
         }
+        else if (clueIndex == 2 && !hasSeenClue3)
+        {
+            hasSeenClue3 = true;
+            subQuestText.text = "ตามหากุญแจ";
+        }
     }
 
     public bool IsSearchingForMysteryPhoto()
     {
         return subQuestText != null && subQuestText.text == "ตามหารูปภาพปริศนา";
+    }
+
+    public void OnFoundKey()
+    {
+        if (!hasFoundKey)
+        {
+            hasFoundKey = true;
+            subQuestText.text = "ปลดล็อคประตู";
+            Debug.Log("🗝️ ได้กุญแจแล้ว → เปลี่ยนเควสเป็น 'ปลดล็อคประตู'");
+        }
+    }
+
+    public void SetEscapeForestQuest()
+    {
+        mainQuestText.text = "หาทางกลับบ้าน";
+        subQuestText.text = "สำรวจป่าทึบ";
     }
 
 

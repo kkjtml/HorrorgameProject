@@ -25,6 +25,9 @@ public class PicturePuzzleUI : MonoBehaviour
     private int selectedSlot = 0; // 🟦 ตำแหน่งช่องที่เลือกอยู่
     private bool hasInitialized = false;
 
+    private bool puzzleCompleted = false;
+    public bool IsPuzzleCompleted() => puzzleCompleted;
+
     private StarterAssets.ThirdPersonController player;
 
     void Awake()
@@ -200,11 +203,18 @@ public class PicturePuzzleUI : MonoBehaviour
         {
             DialogueManager.Instance.Show("มันเรียงถูกแล้ว...", 2f);
             ClosePuzzle();
-            ClueNoteManager.Instance?.ShowClue(2); // หรือทำอย่างอื่นต่อได้
+            puzzleCompleted = true; // ✅ บันทึกสถานะว่าเสร็จแล้ว
+            Invoke(nameof(ShowClue3AfterDelay), 2f); // ✅ ดีเลย์ 2 วิ
         }
         else
         {
             DialogueManager.Instance.Show("ยังเรียงไม่ถูก...", 2f);
         }
     }
+
+    void ShowClue3AfterDelay()
+    {
+        ClueNoteManager.Instance?.ShowClue(2);
+    }
+
 }
