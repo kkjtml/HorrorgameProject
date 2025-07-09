@@ -66,7 +66,7 @@ public class PicturePuzzleUI : MonoBehaviour
             CheckAnswer();
 
         // ออกจาก puzzle
-        if (Mouse.current.rightButton.wasPressedThisFrame)
+        if (Input.GetMouseButtonDown(1))
             ClosePuzzle();
 
         // แสดงช่องที่เลือก (ใส่ขอบ/เอฟเฟกต์ที่ช่อง selectedSlot)
@@ -201,7 +201,7 @@ public class PicturePuzzleUI : MonoBehaviour
 
         if (correct)
         {
-            DialogueManager.Instance.Show("มันเรียงถูกแล้ว...", 2f);
+            DialogueManager.Instance.Show("เรียงถูกแล้ว...", 2f);
             ClosePuzzle();
             puzzleCompleted = true; // ✅ บันทึกสถานะว่าเสร็จแล้ว
             Invoke(nameof(ShowClue3AfterDelay), 2f); // ✅ ดีเลย์ 2 วิ

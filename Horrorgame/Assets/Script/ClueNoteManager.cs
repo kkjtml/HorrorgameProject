@@ -12,6 +12,8 @@ public class ClueNoteManager : MonoBehaviour
     private int currentClueIndex = -1;
     private bool isShowing = false;
 
+    private StarterAssets.ThirdPersonController player;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -25,6 +27,8 @@ public class ClueNoteManager : MonoBehaviour
             if (panel != null) panel.SetActive(false);
         }
 
+        player = FindObjectOfType<StarterAssets.ThirdPersonController>();
+
         if (!QuestManager.Instance.HasFinishedLanternQuest())
         {
             if (clueObjectInWorld != null)
@@ -34,7 +38,7 @@ public class ClueNoteManager : MonoBehaviour
 
     void Update()
     {
-        if (isShowing && Mouse.current.rightButton.wasPressedThisFrame)
+        if (isShowing && Input.GetMouseButtonDown(1))
         {
             CloseClue();
         }
@@ -65,7 +69,6 @@ public class ClueNoteManager : MonoBehaviour
             }
         }
 
-        var player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = false;
     }
 
@@ -80,7 +83,6 @@ public class ClueNoteManager : MonoBehaviour
 
         QuestManager.Instance?.OnClueNoteClosed(closedIndex);
 
-        var player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = true;
     }
 

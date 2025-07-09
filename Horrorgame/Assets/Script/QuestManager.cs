@@ -102,7 +102,7 @@ public class QuestManager : MonoBehaviour
         else if (clueIndex == 1 && !hasSeenClue2)
         {
             hasSeenClue2 = true;
-            subQuestText.text = "ตามหารูปภาพปริศนา";
+            subQuestText.text = "เรียงภาพปริศนา";
         }
         else if (clueIndex == 2 && !hasSeenClue3)
         {
@@ -113,7 +113,7 @@ public class QuestManager : MonoBehaviour
 
     public bool IsSearchingForMysteryPhoto()
     {
-        return subQuestText != null && subQuestText.text == "ตามหารูปภาพปริศนา";
+        return subQuestText != null && subQuestText.text == "เรียงภาพปริศนา";
     }
 
     public void OnFoundKey()

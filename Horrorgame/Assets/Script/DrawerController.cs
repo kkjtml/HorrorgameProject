@@ -33,7 +33,7 @@ public class DrawerController : MonoBehaviour
         //     Debug.Log($"👀 isPlayerNearby = {isPlayerNearby}, HasSeenClue3 = {QuestManager.Instance.HasSeenClue3()}");
         // }
 
-        if (isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
+        if (isPlayerNearby && Input.GetMouseButtonDown(0))
         {
             if (requireClue3 && !QuestManager.Instance.HasSeenClue3())
             {

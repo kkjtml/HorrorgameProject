@@ -29,16 +29,28 @@ public class InspectManager : MonoBehaviour
     private bool isInspecting = false;
     private GameObject keyItemInWorld = null;
 
-    void Start()
-    {
-        if (blackBackground != null)
-            blackBackground.SetActive(false);
-    }
+    private StarterAssets.ThirdPersonController player;
+    private GameObject persistentSpotlightGroup = null;
 
     void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+    }
+
+    void Start()
+    {
+        if (blackBackground != null)
+            blackBackground.SetActive(false);
+
+        // ✅ สร้างกลุ่มแสงครั้งเดียว
+        persistentSpotlightGroup = new GameObject("PersistentLightGroup");
+        persistentSpotlightGroup.SetActive(false); // ปิดไว้ก่อน
+        persistentSpotlightGroup.transform.SetParent(Camera.main.transform);
+
+        CreateSpotLights(persistentSpotlightGroup.transform); // ใช้เดิมได้เลย
+
+        player = FindObjectOfType<StarterAssets.ThirdPersonController>();
     }
 
     void Update()
@@ -65,7 +77,7 @@ public class InspectManager : MonoBehaviour
             // }
 
             // ✅ คลิกขวาออกจาก Inspect
-            if (Mouse.current.rightButton.wasPressedThisFrame)
+            if (Input.GetMouseButtonDown(1))
             {
                 EndInspect();
             }
@@ -98,26 +110,21 @@ public class InspectManager : MonoBehaviour
         Collider col = currentItem.GetComponentInChildren<Collider>();
         if (col != null) col.enabled = false;
 
-        // ✅ LightGroup สำหรับจัดแสงรวม
-        spotlightObj = new GameObject("LightGroup");
-        spotlightObj.transform.SetParent(Camera.main.transform);
-
-        Vector3 basePos = currentItem.transform.position;
-        CreateSpotLights(basePos);
+        // ✅ เปิดแสงที่เตรียมไว้
+        persistentSpotlightGroup.SetActive(true);
 
         blackBackground.SetActive(true);
         isInspecting = true;
 
-        // 🔒 ปิดการเคลื่อนไหว
-        StarterAssets.ThirdPersonController player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = false;
     }
 
-    private void CreateSpotLights(Vector3 basePos)
+    private void CreateSpotLights(Transform parent)
     {
-        // Key Light
+        Vector3 basePos = Camera.main.transform.position + Camera.main.transform.forward * 0.3f;
+
         GameObject key = new GameObject("KeyLight");
-        key.transform.SetParent(spotlightObj.transform);
+        key.transform.SetParent(parent);
         key.transform.position = basePos + Camera.main.transform.forward * 0.6f + Vector3.up * 0.1f;
         var light1 = key.AddComponent<Light>();
         light1.intensity = 0.45f;
@@ -126,9 +133,8 @@ public class InspectManager : MonoBehaviour
         light1.shadows = LightShadows.Soft;
         light1.shadowStrength = 0.2f;
 
-        // Fill Light
         GameObject fill = new GameObject("FillLight");
-        fill.transform.SetParent(spotlightObj.transform);
+        fill.transform.SetParent(parent);
         fill.transform.position = basePos + Camera.main.transform.right * 0.3f + Vector3.up * 0.05f;
         var light2 = fill.AddComponent<Light>();
         light2.intensity = 0.2f;
@@ -136,9 +142,8 @@ public class InspectManager : MonoBehaviour
         light2.color = new Color(0.8f, 0.85f, 1f);
         light2.shadows = LightShadows.None;
 
-        // Rim Light
         GameObject rim = new GameObject("RimLight");
-        rim.transform.SetParent(spotlightObj.transform);
+        rim.transform.SetParent(parent);
         rim.transform.position = basePos - Camera.main.transform.forward * 0.4f + Vector3.up * 0.1f;
         var light3 = rim.AddComponent<Light>();
         light3.intensity = 0.25f;
@@ -151,7 +156,8 @@ public class InspectManager : MonoBehaviour
     {
         if (currentItem != null) Destroy(currentItem);
 
-        if (spotlightObj != null) Destroy(spotlightObj);
+        // ✅ ปิด spotlight เดิมแทนการ Destroy
+        if (persistentSpotlightGroup != null) persistentSpotlightGroup.SetActive(false);
 
         // ✅ เปิดของจริงกลับมา
         if (originalItem != null)
@@ -172,7 +178,6 @@ public class InspectManager : MonoBehaviour
         blackBackground.SetActive(false);
         isInspecting = false;
 
-        StarterAssets.ThirdPersonController player = FindObjectOfType<StarterAssets.ThirdPersonController>();
         if (player != null) player.enabled = true;
     }
 

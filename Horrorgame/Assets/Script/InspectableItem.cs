@@ -15,35 +15,59 @@ public class InspectableItem : MonoBehaviour
     public bool isKey = false;
     private bool hasCollectedKey = false;
 
-    void Update()
+    // void Update()
+    // {
+    //     if (isPlayerNearby && Input.GetMouseButtonDown(0) && !DialogueManager.Instance.IsShowing())
+    //     {
+    //         if (!CanInspectBasedOnCondition())
+    //         {
+    //             // DialogueManager.Instance?.Show("ฉันควรหาคำใบ้ก่อน...", 2f);
+    //             return;
+    //         }
+
+    //         // ✅ แสดงข้อความทุกบรรทัดแบบต่อเนื่อง
+    //         if (dialogueLines != null && dialogueLines.Length > 0)
+    //         {
+    //             DialogueManager.Instance?.Show(dialogueLines[0], 2f);
+    //             for (int i = 1; i < dialogueLines.Length; i++)
+    //             {
+    //                 DialogueManager.Instance?.Queue(dialogueLines[i], 2f);
+    //             }
+    //         }
+
+    //         if (isKey && !hasCollectedKey)
+    //         {
+    //             hasCollectedKey = true;
+    //             InspectManager.Instance?.SetKeyItem(this.gameObject);
+    //         }
+
+    //         // ✅ ส่งตัวที่อยู่ใน scene จริงเข้าไปเป็น `originalSource`
+    //         InspectManager.Instance?.StartInspect(prefabToInspect, this.gameObject);
+    //     }
+    // }
+
+    private void OnTriggerStay(Collider other)
     {
-        if (isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
+        if (!other.CompareTag("Player")) return;
+        if (!Input.GetMouseButtonDown(0)) return;
+        if (DialogueManager.Instance.IsShowing()) return;
+
+        if (!CanInspectBasedOnCondition()) return;
+
+        if (dialogueLines != null && dialogueLines.Length > 0)
         {
-            if (!CanInspectBasedOnCondition())
-            {
-                // DialogueManager.Instance?.Show("ฉันควรหาคำใบ้ก่อน...", 2f);
-                return;
-            }
-
-            // ✅ แสดงข้อความทุกบรรทัดแบบต่อเนื่อง
-            if (dialogueLines != null && dialogueLines.Length > 0)
-            {
-                DialogueManager.Instance?.Show(dialogueLines[0], 2f);
-                for (int i = 1; i < dialogueLines.Length; i++)
-                {
-                    DialogueManager.Instance?.Queue(dialogueLines[i], 2f);
-                }
-            }
-
-            if (isKey && !hasCollectedKey)
-            {
-                hasCollectedKey = true;
-                InspectManager.Instance?.SetKeyItem(this.gameObject);
-            }
-
-            // ✅ ส่งตัวที่อยู่ใน scene จริงเข้าไปเป็น `originalSource`
-            InspectManager.Instance?.StartInspect(prefabToInspect, this.gameObject);
+            DialogueManager.Instance?.Show(dialogueLines[0], 2f);
+            for (int i = 1; i < dialogueLines.Length; i++)
+                DialogueManager.Instance?.Queue(dialogueLines[i], 2f);
         }
+
+        if (isKey && !hasCollectedKey)
+        {
+            hasCollectedKey = true;
+            InspectManager.Instance?.SetKeyItem(this.gameObject);
+        }
+
+        InspectManager.Instance?.StartInspect(prefabToInspect, this.gameObject);
     }
 
     private bool CanInspectBasedOnCondition()
@@ -70,15 +94,15 @@ public class InspectableItem : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-            isPlayerNearby = true;
-    }
+    // private void OnTriggerEnter(Collider other)
+    // {
+    //     if (other.CompareTag("Player"))
+    //         isPlayerNearby = true;
+    // }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-            isPlayerNearby = false;
-    }
+    // private void OnTriggerExit(Collider other)
+    // {
+    //     if (other.CompareTag("Player"))
+    //         isPlayerNearby = false;
+    // }
 }

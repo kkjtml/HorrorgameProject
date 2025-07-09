@@ -65,7 +65,7 @@ public class DoorController : MonoBehaviour
             }
         }
 
-        if (isUnlocked && isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
+        if (isUnlocked && isPlayerNearby && Input.GetMouseButtonDown(0))
         {
             ToggleDoor();
 
@@ -77,7 +77,7 @@ public class DoorController : MonoBehaviour
                 QuestManager.Instance?.SetEscapeForestQuest();
             }
         }
-        else if (isPlayerNearby && Mouse.current.leftButton.wasPressedThisFrame)
+        else if (isPlayerNearby && Input.GetMouseButtonDown(0))
         {
             DialogueManager.Instance?.Show("ประตูล็อค ฉันเปิดไม่ได้", 1f);
         }

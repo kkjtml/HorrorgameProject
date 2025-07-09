@@ -101,4 +101,7 @@ public class DialogueManager : MonoBehaviour
         isShowing = false;
     }
 
+    public bool IsShowing() => isShowing;
+
+
 }

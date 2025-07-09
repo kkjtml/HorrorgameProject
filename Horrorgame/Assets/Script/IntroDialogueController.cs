@@ -8,11 +8,12 @@ public class IntroDialogueController : MonoBehaviour
 
     void Start()
     {
+        // Application.targetFrameRate = 120;
         player = FindObjectOfType<StarterAssets.ThirdPersonController>();
 
         if (player != null)
         {
-            player.enabled = false; 
+            player.enabled = false;
         }
 
         StartCoroutine(PlayIntroDialogue());
@@ -21,10 +22,9 @@ public class IntroDialogueController : MonoBehaviour
     private IEnumerator PlayIntroDialogue()
     {
         yield return null;
-        
+
         DialogueManager.Instance?.Show("ที่นี่ที่ไหน...", 2f);
         DialogueManager.Instance?.Queue("ฉันต้องหาทางออกจากบ้านนี้", 2.5f);
-        DialogueManager.Instance.Show("ก่อนอื่น...ฉันต้องสำรวจบ้านนี้ก่อน", 3f);
 
         // ⏳ รอรวมทั้งหมดก่อนปลดล็อก
         yield return new WaitForSeconds(2f + 2.5f + 0.25f);
@@ -33,5 +33,7 @@ public class IntroDialogueController : MonoBehaviour
         {
             player.enabled = true; // ✅ เปิดควบคุม
         }
+
+        DialogueManager.Instance.Show("ก่อนอื่น...ฉันต้องสำรวจบ้านนี้ก่อน", 3f);
     }
 }

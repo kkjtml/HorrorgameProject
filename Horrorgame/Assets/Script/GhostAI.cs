@@ -18,7 +18,7 @@ public class GhostAI : MonoBehaviour
 
     public LanternShakeEffect proximityShake;
     public float scareDistance = 5f;
-    
+
     private NavMeshAgent agent;
     private Animator animator;
     private Transform player;
@@ -138,7 +138,10 @@ public class GhostAI : MonoBehaviour
 
     void ChasePlayer()
     {
-        agent.SetDestination(player.position);
+        // agent.SetDestination(player.position);
+        if ((agent.destination - player.position).sqrMagnitude > 0.2f)
+            agent.SetDestination(player.position);
+
         lastKnownPlayerPosition = player.position;
 
         if (Vector3.Distance(transform.position, player.position) > suspiciousDistance)
