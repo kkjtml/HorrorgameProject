@@ -25,6 +25,8 @@ public class GhostAI : MonoBehaviour
     private Vector3 lastKnownPlayerPosition;
     private bool playerInSight = false;
 
+    public RedLightPulse redLight;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -40,11 +42,13 @@ public class GhostAI : MonoBehaviour
         if (distance <= scareDistance)
         {
             float power = Mathf.Clamp01(1 - (distance / scareDistance));
-            proximityShake?.SetShakePower(power);
+            proximityShake?.SetShakePower(power);  // กล้องสั่น
+            redLight?.SetLightIntensity(power);       // แสงกระพริบแรงขึ้น
         }
         else
         {
             proximityShake?.SetShakePower(0);
+            redLight?.SetLightIntensity(0);
         }
 
         switch (currentState)
