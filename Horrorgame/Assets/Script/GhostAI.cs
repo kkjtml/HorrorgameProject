@@ -27,6 +27,18 @@ public class GhostAI : MonoBehaviour
 
     public RedLightPulse redLight;
 
+    public static GhostAI Instance;
+    private bool playerHidden = false;
+
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
+    public void SetPlayerHidden(bool state) => playerHidden = state;
+    public bool IsPlayerHidden() => playerHidden;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -38,6 +50,14 @@ public class GhostAI : MonoBehaviour
 
     void Update()
     {
+        if (IsPlayerHidden())
+        {
+            // ปิดกล้องสั่น + แสง เมื่อผู้เล่นซ่อน
+            proximityShake?.SetShakePower(0);
+            redLight?.SetLightIntensity(0);
+            return;
+        }
+
         float distance = Vector3.Distance(transform.position, player.position);
         if (distance <= scareDistance)
         {
