@@ -5,7 +5,16 @@ using UnityEngine.AI;
 
 public class GhostAI : MonoBehaviour
 {
-    public enum GhostState { Idle, Patrol, Suspicious, Chase, Search, Return }
+    public enum GhostState
+    {
+        Idle,         // ยืนนิ่งเฉย
+        Patrol,       // เดินตรวจตามจุด
+        Suspicious,   // เห็นผู้เล่นจากระยะไกล → หันไปดู
+        Chase,        // ไล่ผู้เล่น
+        Search,       // เดินไปหาจุดสุดท้ายที่เห็นผู้เล่น
+        Return        // กลับไปเดิน patrol ตามเดิม
+    }
+
     public GhostState currentState = GhostState.Idle;
 
     public Transform[] patrolPoints;
@@ -29,6 +38,7 @@ public class GhostAI : MonoBehaviour
 
     public static GhostAI Instance;
     private bool playerHidden = false;
+    private bool isWaitingAtCabinet = false;
 
     void Awake()
     {
@@ -45,30 +55,24 @@ public class GhostAI : MonoBehaviour
         animator = GetComponent<Animator>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
-        ChangeState(GhostState.Idle);
+        ChangeState(GhostState.Patrol);
     }
 
     void Update()
     {
+        float distance = Vector3.Distance(transform.position, player.position);
+
+        // 🎯 ให้ update เอฟเฟกต์ทุกเฟรม ไม่ว่า Player ซ่อนหรือไม่
+        UpdateScareEffects(distance);
+
         if (IsPlayerHidden())
         {
-            // ปิดกล้องสั่น + แสง เมื่อผู้เล่นซ่อน
-            proximityShake?.SetShakePower(0);
-            redLight?.SetLightIntensity(0);
+            if (!isWaitingAtCabinet &&
+        (currentState == GhostState.Chase || currentState == GhostState.Suspicious || currentState == GhostState.Search))
+            {
+                StartCoroutine(WaitBeforeReturn());
+            }
             return;
-        }
-
-        float distance = Vector3.Distance(transform.position, player.position);
-        if (distance <= scareDistance)
-        {
-            float power = Mathf.Clamp01(1 - (distance / scareDistance));
-            proximityShake?.SetShakePower(power);  // กล้องสั่น
-            redLight?.SetLightIntensity(power);       // แสงกระพริบแรงขึ้น
-        }
-        else
-        {
-            proximityShake?.SetShakePower(0);
-            redLight?.SetLightIntensity(0);
         }
 
         switch (currentState)
@@ -98,6 +102,59 @@ public class GhostAI : MonoBehaviour
             case GhostState.Return:
                 ReturnToPatrol();
                 break;
+        }
+    }
+
+    private IEnumerator WaitBeforeReturn()
+    {
+        isWaitingAtCabinet = true;
+
+        agent.isStopped = true;
+        animator.Play("LookAround");
+        Debug.Log("👻 Ghost is waiting outside cabinet...");
+
+        float waitTime = 0f;
+        while (waitTime < 2f)
+        {
+            // ❗ ถ้าผู้เล่นออกจากตู้ระหว่างรอ
+            if (!IsPlayerHidden())
+            {
+                // เช็กว่ามองเห็นจริง
+                Vector3 toPlayer = (player.position - transform.position).normalized;
+                float angle = Vector3.Angle(transform.forward, toPlayer);
+
+                if (angle < 60f) // มุมมอง 120° (60° ซ้ายขวา)
+                {
+                    Debug.Log("👀 Player came out of cabinet! Ghost starts chasing!");
+                    agent.isStopped = false;
+                    ChangeState(GhostState.Chase);
+                    isWaitingAtCabinet = false;
+                    yield break; // ออกจาก Coroutine ทันที
+                }
+            }
+
+            waitTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // ถ้าครบ 2 วิแล้วยังไม่เห็น → กลับ patrol
+        agent.isStopped = false;
+        ChangeState(GhostState.Return);
+        isWaitingAtCabinet = false;
+    }
+
+    void UpdateScareEffects(float distance)
+    {
+        if (distance <= scareDistance)
+        {
+            float power = Mathf.Clamp01(1 - (distance / scareDistance));
+            proximityShake?.SetShakePower(power);
+            redLight?.SetLightIntensity(power);
+        }
+        else
+        {
+            proximityShake?.SetShakePower(0);
+            redLight?.SetLightIntensity(0);
         }
     }
 
@@ -162,7 +219,12 @@ public class GhostAI : MonoBehaviour
 
     void ChasePlayer()
     {
-        // agent.SetDestination(player.position);
+        if (IsPlayerHidden())
+        {
+            ChangeState(GhostState.Return);
+            return;
+        }
+
         if ((agent.destination - player.position).sqrMagnitude > 0.2f)
             agent.SetDestination(player.position);
 

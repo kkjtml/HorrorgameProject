@@ -12,9 +12,10 @@ public class LanternShakeEffect : MonoBehaviour
     public float maxShakeIntensity = 5f;
     public float maxOverlayAlpha = 0.5f;
 
-    private float timer = 0f;
-    private bool isShaking = false;
+    // private float timer = 0f;
+    // private bool isShaking = false;
     private CinemachineBasicMultiChannelPerlin perlin;
+    private float shakePower;
 
     void Start()
     {
@@ -22,32 +23,32 @@ public class LanternShakeEffect : MonoBehaviour
             perlin = virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
     }
 
-    public void TriggerShake()
-    {
-        redOverlayImage.color = new Color(1f, 0f, 0f, 0.8f); // สีแดงทึบ
-        isShaking = true;
-        timer = 0f;
-    }
+    // public void TriggerShake()
+    // {
+    //     redOverlayImage.color = new Color(1f, 0f, 0f, 0.8f); // สีแดงทึบ
+    //     isShaking = true;
+    //     timer = 0f;
+    // }
 
-    void Update()
-    {
-        if (!isShaking || perlin == null) return;
+    // void Update()
+    // {
+    //     if (!isShaking || perlin == null) return;
 
-        timer += Time.deltaTime;
-        float t = timer / shakeDuration;
+    //     timer += Time.deltaTime;
+    //     float t = timer / shakeDuration;
 
-        if (t >= 1f)
-        {
-            perlin.m_AmplitudeGain = 0f;
-            SetOverlayAlpha(0f);
-            isShaking = false;
-            return;
-        }
+    //     if (t >= 1f)
+    //     {
+    //         perlin.m_AmplitudeGain = 0f;
+    //         SetOverlayAlpha(0f);
+    //         isShaking = false;
+    //         return;
+    //     }
 
-        float intensity = Mathf.Lerp(0f, maxShakeIntensity, t);
-        perlin.m_AmplitudeGain = intensity;
-        SetOverlayAlpha(Mathf.Lerp(0f, maxOverlayAlpha, t));
-    }
+    //     float intensity = Mathf.Lerp(0f, maxShakeIntensity, t);
+    //     perlin.m_AmplitudeGain = intensity;
+    //     SetOverlayAlpha(Mathf.Lerp(0f, maxOverlayAlpha, t));
+    // }
 
     void SetOverlayAlpha(float alpha)
     {
@@ -67,11 +68,22 @@ public class LanternShakeEffect : MonoBehaviour
 
     public void SetShakePower(float power)
     {
-        if (perlin != null)
-            perlin.m_AmplitudeGain = power * maxShakeIntensity;
+        shakePower = Mathf.Clamp01(power);
 
-        SetOverlayAlpha(power * maxOverlayAlpha);
+        if (perlin != null)
+            perlin.m_AmplitudeGain = shakePower * maxShakeIntensity;
+
+        SetOverlayAlpha(shakePower * maxOverlayAlpha);
     }
 
+    public float GetShakePower()
+    {
+        return shakePower;
+    }
 
+    public void SetVirtualCamera(CinemachineVirtualCamera vcam)
+    {
+        virtualCamera = vcam;
+        perlin = virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+    }
 }

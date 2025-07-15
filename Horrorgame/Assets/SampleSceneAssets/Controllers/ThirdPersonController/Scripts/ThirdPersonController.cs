@@ -415,5 +415,15 @@ namespace StarterAssets
                 Debug.Log("Flashlight toggled: " + flashlightOn);
             }
         }
+
+        public void ResetAnimation()
+        {
+            _animationBlend = 0f;
+            if (_hasAnimator)
+            {
+                _animator.SetFloat(_animIDSpeed, 0f);
+                _animator.SetFloat(_animIDMotionSpeed, 0f);
+            }
+        }
     }
 }
