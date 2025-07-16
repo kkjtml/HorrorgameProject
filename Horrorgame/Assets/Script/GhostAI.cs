@@ -40,6 +40,11 @@ public class GhostAI : MonoBehaviour
     private bool playerHidden = false;
     private bool isWaitingAtCabinet = false;
 
+    [Header("Ghost Movement Speeds")]
+    public float walkSpeed = 1.5f;
+    public float runSpeed = 3.5f;
+    public float patrolSpeed = 1.2f;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -78,17 +83,18 @@ public class GhostAI : MonoBehaviour
         switch (currentState)
         {
             case GhostState.Idle:
-                if (distance <= suspiciousDistance) ChangeState(GhostState.Suspicious);
-                break;
-
             case GhostState.Patrol:
-                if (distance <= chaseDistance) ChangeState(GhostState.Chase);
-                else Patrol();
+                if (CanSeePlayer())
+                    ChangeState(GhostState.Chase);
+                else
+                    Patrol();
                 break;
 
             case GhostState.Suspicious:
-                if (distance <= chaseDistance) ChangeState(GhostState.Chase);
-                else LookAtPlayer();
+                if (CanSeePlayer())
+                    ChangeState(GhostState.Chase);
+                else
+                    LookAtPlayer();
                 break;
 
             case GhostState.Chase:
@@ -161,6 +167,7 @@ public class GhostAI : MonoBehaviour
     void ChangeState(GhostState newState)
     {
         currentState = newState;
+
         switch (newState)
         {
             case GhostState.Idle:
@@ -169,28 +176,33 @@ public class GhostAI : MonoBehaviour
                 break;
 
             case GhostState.Patrol:
+                agent.speed = patrolSpeed;
                 agent.isStopped = false;
                 agent.SetDestination(patrolPoints[patrolIndex].position);
                 animator.Play("Walk");
                 break;
 
             case GhostState.Suspicious:
+                agent.speed = walkSpeed;
                 agent.isStopped = true;
                 animator.Play("LookAround");
                 break;
 
             case GhostState.Chase:
+                agent.speed = runSpeed; // ✅ ผีไล่ด้วยความเร็วนี้
                 agent.isStopped = false;
                 animator.Play("Run");
                 break;
 
             case GhostState.Search:
+                agent.speed = walkSpeed;
                 searchTimer = 0f;
                 agent.SetDestination(lastKnownPlayerPosition);
                 animator.Play("LookAround");
                 break;
 
             case GhostState.Return:
+                agent.speed = patrolSpeed;
                 agent.SetDestination(patrolPoints[patrolIndex].position);
                 animator.Play("Walk");
                 break;
@@ -254,6 +266,27 @@ public class GhostAI : MonoBehaviour
         {
             ChangeState(GhostState.Patrol);
         }
+    }
+
+    bool CanSeePlayer()
+    {
+        if (IsPlayerHidden()) return false;
+
+        Vector3 directionToPlayer = player.position - transform.position;
+        float angle = Vector3.Angle(transform.forward, directionToPlayer);
+
+        if (angle > 60f) return false;
+
+        Ray ray = new Ray(transform.position + Vector3.up * 1.5f, directionToPlayer.normalized);
+        if (Physics.Raycast(ray, out RaycastHit hit, suspiciousDistance))
+        {
+            if (hit.collider.CompareTag("Player"))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
