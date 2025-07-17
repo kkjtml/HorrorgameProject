@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 public class ClueNoteTrigger : MonoBehaviour
 {
     public int clueIndex = 0;
-    private bool isPlayerNearby = false;
+    private bool hasInteracted = false;
 
     // void Update()
     // {
@@ -36,15 +36,37 @@ public class ClueNoteTrigger : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        if (!Input.GetMouseButtonDown(0)) return;
-        if (ClueNoteManager.Instance.IsClueShowing()) return;
+        if (ClueNoteManager.Instance == null || ClueNoteManager.Instance.IsClueShowing()) return;
+        if (hasInteracted) return;
 
-        if (clueIndex == 0 && QuestManager.Instance?.HasFinishedLanternQuest() == true)
+        // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
+        bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+
+        if (mousePressed || gamepadPressed)
         {
-            Debug.Log("🚫 Clue 0 is disabled after lantern quest is done.");
-            return;
-        }
+            if (clueIndex == 0 && QuestManager.Instance?.HasFinishedLanternQuest() == true)
+            {
+                Debug.Log("🚫 Clue 0 is disabled after lantern quest is done.");
+                return;
+            }
 
-        ClueNoteManager.Instance.ShowClue(clueIndex);
+            ClueNoteManager.Instance.ShowClue(clueIndex);
+            hasInteracted = true;
+        }
     }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            hasInteracted = false; // reset เมื่อออกจาก trigger
+        }
+    }
+
+    public void ResetInteract()
+    {
+        hasInteracted = false;
+    }
+
 }

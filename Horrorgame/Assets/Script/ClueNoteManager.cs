@@ -36,13 +36,13 @@ public class ClueNoteManager : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        if (isShowing && Input.GetMouseButtonDown(1))
-        {
-            CloseClue();
-        }
-    }
+    // void Update()
+    // {
+    //     if (isShowing && Input.GetMouseButtonDown(1))
+    //     {
+    //         CloseClue();
+    //     }
+    // }
 
     public void ShowClue(int index)
     {
@@ -70,6 +70,26 @@ public class ClueNoteManager : MonoBehaviour
         }
 
         if (player != null) player.enabled = false;
+
+        // ✅ รอจนกว่าจะกดคลิกขวาหรือ B
+        yield return StartCoroutine(WaitForCloseInput());
+
+        CloseClue();
+
+    }
+
+    private IEnumerator WaitForCloseInput()
+    {
+        while (true)
+        {
+            bool rightClick = Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame;
+            bool gamepadB = Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame;
+
+            if (rightClick || gamepadB)
+                yield break;
+
+            yield return null;
+        }
     }
 
     void CloseClue()
@@ -84,6 +104,22 @@ public class ClueNoteManager : MonoBehaviour
         QuestManager.Instance?.OnClueNoteClosed(closedIndex);
 
         if (player != null) player.enabled = true;
+
+        // ✅ Reset trigger
+        ResetNearbyTrigger();
+    }
+
+    private void ResetNearbyTrigger()
+    {
+        Collider[] nearby = Physics.OverlapSphere(player.transform.position, 1.5f);
+        foreach (var col in nearby)
+        {
+            var clueTrigger = col.GetComponent<ClueNoteTrigger>();
+            if (clueTrigger != null)
+            {
+                clueTrigger.ResetInteract();
+            }
+        }
     }
 
     public bool IsClueShowing() => isShowing;

@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 public class PicturePuzzleTrigger : MonoBehaviour
 {
-    private bool isPlayerNearby = false;
+    private bool hasInteracted = false;
 
     // void Update()
     // {
@@ -40,12 +40,31 @@ public class PicturePuzzleTrigger : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        if (!Input.GetMouseButtonDown(0)) return;
+        if (hasInteracted) return;
 
-        if (PicturePuzzleUI.Instance != null && PicturePuzzleUI.Instance.IsPuzzleCompleted()) return;
-        if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingForMysteryPhoto())
+        // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
+        bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+
+        if (mousePressed || gamepadPressed)
         {
-            PicturePuzzleUI.Instance?.OpenPuzzle();
+            if (PicturePuzzleUI.Instance != null && PicturePuzzleUI.Instance.IsPuzzleCompleted()) return;
+            if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingForMysteryPhoto())
+            {
+                PicturePuzzleUI.Instance?.OpenPuzzle();
+            }
         }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            hasInteracted = false; // reset เมื่อออกจาก trigger
+        }
+    }
+
+    public void ResetInteract()
+    {
+        hasInteracted = false;
     }
 }

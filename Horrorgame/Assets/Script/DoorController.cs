@@ -65,7 +65,11 @@ public class DoorController : MonoBehaviour
             }
         }
 
-        if (isUnlocked && isPlayerNearby && Input.GetMouseButtonDown(0))
+        // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
+        bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+
+        if (isUnlocked && isPlayerNearby && (mousePressed || gamepadPressed))
         {
             ToggleDoor();
 
@@ -77,7 +81,7 @@ public class DoorController : MonoBehaviour
                 QuestManager.Instance?.SetEscapeForestQuest();
             }
         }
-        else if (isPlayerNearby && Input.GetMouseButtonDown(0))
+        else if (isPlayerNearby && (mousePressed || gamepadPressed))
         {
             DialogueManager.Instance?.Show("ประตูล็อค ฉันเปิดไม่ได้", 1f);
         }

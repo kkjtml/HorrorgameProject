@@ -137,9 +137,11 @@ namespace StarterAssets
 
             AssignAnimationIDs();
 
+            _input.analogMovement = true;
+
             // reset our timeouts on start
-            _jumpTimeoutDelta = JumpTimeout;
-            _fallTimeoutDelta = FallTimeout;
+            // _jumpTimeoutDelta = JumpTimeout;
+            // _fallTimeoutDelta = FallTimeout;
         }
 
         private void Update()
@@ -296,7 +298,7 @@ namespace StarterAssets
             if (Grounded)
             {
                 // reset the fall timeout timer
-                _fallTimeoutDelta = FallTimeout;
+                // _fallTimeoutDelta = FallTimeout;
 
                 // update animator if using character
                 if (_hasAnimator)
@@ -315,13 +317,16 @@ namespace StarterAssets
                 if (_input.jump && _jumpTimeoutDelta <= 0.0f)
                 {
                     // the square root of H * -2 * G = how much velocity needed to reach desired height
-                    _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+                    // _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
 
                     // update animator if using character
-                    if (_hasAnimator)
-                    {
-                        _animator.SetBool(_animIDJump, true);
-                    }
+                    // if (_hasAnimator)
+                    // {
+                    //     _animator.SetBool(_animIDJump, true);
+                    // }
+
+                    // บล็อกไม่ให้กระโดด
+                    _input.jump = false;
                 }
 
                 // jump timeout
@@ -403,16 +408,13 @@ namespace StarterAssets
 
         private void ToggleFlashlight()
         {
-            if (Keyboard.current.fKey.wasPressedThisFrame)
-            {
-                Debug.Log("F key pressed");
-            }
-
-            if (Keyboard.current.fKey.wasPressedThisFrame && flashlight != null)
+            if (_input.toggleFlashlight && flashlight != null)
             {
                 flashlightOn = !flashlightOn;
                 flashlight.enabled = flashlightOn;
                 Debug.Log("Flashlight toggled: " + flashlightOn);
+
+                _input.toggleFlashlight = false; // รีเซ็ตสถานะหลังใช้งาน
             }
         }
 

@@ -23,6 +23,8 @@ public class PicturePuzzleUI : MonoBehaviour
     public PictureType[] correctOrder = { PictureType.Skull, PictureType.Crown, PictureType.intestine };
 
     private int selectedSlot = 0; // 🟦 ตำแหน่งช่องที่เลือกอยู่
+    private float lastDpadX = 0f;
+
     private bool hasInitialized = false;
 
     private bool puzzleCompleted = false;
@@ -39,37 +41,55 @@ public class PicturePuzzleUI : MonoBehaviour
     {
         if (!uiPanel.activeInHierarchy) return;
 
-        // เลื่อนไปช่องก่อนหน้า/ถัดไป
-        if (Keyboard.current.qKey.wasPressedThisFrame)
+        // --------------------------
+        // 🎮 Gamepad Input (เช็ค null ทุกตัว)
+        Gamepad gamepad = Gamepad.current;
+
+        Vector2 dpad = gamepad != null ? gamepad.dpad.ReadValue() : Vector2.zero;
+        bool gamepadLT = gamepad != null && gamepad.leftTrigger.wasPressedThisFrame;
+        bool gamepadRT = gamepad != null && gamepad.rightTrigger.wasPressedThisFrame;
+        bool gamepadX = gamepad != null && gamepad.buttonWest.wasPressedThisFrame;
+        bool gamepadA = gamepad != null && gamepad.buttonSouth.wasPressedThisFrame;
+        bool gamepadB = gamepad != null && gamepad.buttonEast.wasPressedThisFrame;
+        // --------------------------
+        // ✅ Move slot selection (D-Pad Left/Right)
+        float dpadX = dpad.x;
+
+        if ((Keyboard.current?.qKey.wasPressedThisFrame ?? false) || (dpadX < -0.5f && lastDpadX >= -0.5f))
             selectedSlot = Mathf.Max(0, selectedSlot - 1);
 
-        if (Keyboard.current.eKey.wasPressedThisFrame)
+        if ((Keyboard.current?.eKey.wasPressedThisFrame ?? false) || (dpadX > 0.5f && lastDpadX <= 0.5f))
             selectedSlot = Mathf.Min(2, selectedSlot + 1);
 
-        // หมุน
-        if (Keyboard.current.rKey.wasPressedThisFrame)
+        lastDpadX = dpadX; // ❗ อย่าลืมอัปเดตทุกเฟรม
+        // --------------------------
+        // 🔄 Swap picture
+        if ((Keyboard.current?.aKey.wasPressedThisFrame ?? false) || gamepadLT)
+            SwapLeft(selectedSlot);
+
+        if ((Keyboard.current?.dKey.wasPressedThisFrame ?? false) || gamepadRT)
+            SwapRight(selectedSlot);
+
+        // --------------------------
+        // 🔃 Rotate
+        if ((Keyboard.current?.rKey.wasPressedThisFrame ?? false) || gamepadX)
         {
-            // หมุนทีละ 90 องศา และวนกลับเมื่อเกิน 270
             currentRotations[selectedSlot] = (currentRotations[selectedSlot] + 90f) % 360f;
             UpdateSlots();
         }
 
-        // สลับภาพ
-        if (Keyboard.current.aKey.wasPressedThisFrame)
-            SwapLeft(selectedSlot);
-
-        if (Keyboard.current.dKey.wasPressedThisFrame)
-            SwapRight(selectedSlot);
-
-        // ตรวจคำตอบ
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        // --------------------------
+        // ✅ Check Answer
+        if ((Keyboard.current?.spaceKey.wasPressedThisFrame ?? false) || gamepadA)
             CheckAnswer();
 
-        // ออกจาก puzzle
-        if (Input.GetMouseButtonDown(1))
+        // --------------------------
+        // ❌ Exit puzzle
+        bool mouseBack = Mouse.current?.rightButton.wasPressedThisFrame ?? false;
+        if (mouseBack || gamepadB)
             ClosePuzzle();
 
-        // แสดงช่องที่เลือก (ใส่ขอบ/เอฟเฟกต์ที่ช่อง selectedSlot)
+        // --------------------------
         HighlightSelectedSlot();
     }
 
@@ -126,6 +146,26 @@ public class PicturePuzzleUI : MonoBehaviour
 
         if (player != null)
             player.enabled = true;
+
+        ResetTrigger();
+    }
+
+    private void ResetTrigger()
+    {
+        if (player == null)
+            player = FindObjectOfType<StarterAssets.ThirdPersonController>();
+
+        if (player == null) return;
+
+        Collider[] nearby = Physics.OverlapSphere(player.transform.position, 1.5f);
+        foreach (var col in nearby)
+        {
+            var puzzleTrigger = col.GetComponent<PicturePuzzleTrigger>();
+            if (puzzleTrigger != null)
+            {
+                puzzleTrigger.ResetInteract();
+            }
+        }
     }
 
     public void NextImage(int slotIndex)

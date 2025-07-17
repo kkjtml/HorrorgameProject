@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.InputSystem;
 
 public class GhostAI : MonoBehaviour
 {
@@ -156,11 +157,19 @@ public class GhostAI : MonoBehaviour
             float power = Mathf.Clamp01(1 - (distance / scareDistance));
             proximityShake?.SetShakePower(power);
             redLight?.SetLightIntensity(power);
+
+            // ✅ เพิ่มการสั่นตาม power
+            if (Gamepad.current != null)
+                Gamepad.current.SetMotorSpeeds(power * 0.5f, power); // low freq, high freq
         }
         else
         {
             proximityShake?.SetShakePower(0);
             redLight?.SetLightIntensity(0);
+
+            // ✅ หยุดการสั่นเมื่ออยู่ไกล
+            if (Gamepad.current != null)
+                Gamepad.current.SetMotorSpeeds(0f, 0f);
         }
     }
 

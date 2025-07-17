@@ -26,15 +26,21 @@ public class DrawerController : MonoBehaviour
 
     void Update()
     {
-        // // ให้กดปุ่ม K เพื่อเปิด/ปิดแบบ hard
-        // if (Keyboard.current.kKey.wasPressedThisFrame)
-        // {
-        //     ToggleDrawer();
-        //     Debug.Log($"👀 isPlayerNearby = {isPlayerNearby}, HasSeenClue3 = {QuestManager.Instance.HasSeenClue3()}");
-        // }
-
-        if (isPlayerNearby && Input.GetMouseButtonDown(0))
+        // ให้กดปุ่ม K เพื่อเปิด/ปิดแบบ hard
+        if (Keyboard.current.kKey.wasPressedThisFrame)
         {
+            ToggleDrawer();
+            Debug.Log($"👀 isPlayerNearby = {isPlayerNearby}, HasSeenClue3 = {QuestManager.Instance.HasSeenClue3()}");
+        }
+
+        // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
+        bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+
+        if (isPlayerNearby && (mousePressed || gamepadPressed))
+        {
+            Debug.Log("✅ ปุ่มถูกกด + อยู่ใกล้");
+
             if (requireClue3 && !QuestManager.Instance.HasSeenClue3())
             {
                 Debug.Log("🚫 ยังไม่ได้ดู Clue 3 → ห้ามเปิดลิ้นชัก");

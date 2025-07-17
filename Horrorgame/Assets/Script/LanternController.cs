@@ -7,7 +7,6 @@ public class LanternController : MonoBehaviour
 {
     public Light lanternLight;
     private bool isLit = false;
-    private bool playerInRange = false;
 
     public int lanternIndex = 0;
 
@@ -28,27 +27,33 @@ public class LanternController : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        if (!Input.GetMouseButtonDown(0)) return;
         if (isLit) return;
 
-        if (ClueNoteManager.Instance?.IsClueShowing() == true) return;
-        if (!QuestManager.Instance?.HasSeenClueNote() == true)
-        {
-            DialogueManager.Instance?.Show("ดูเหมือนจะเป็นตะเกียงเก่าๆ", 2f);
-            return;
-        }
+        // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
+        bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
 
-        if (!LanternManager.Instance.CanLightLantern(lanternIndex))
+        if (mousePressed || gamepadPressed)
         {
-            DialogueManager.Instance?.Show("จุดตะเกียงไม่ถูกต้อง...", 2f);
-            DialogueManager.Instance?.Queue("ต้องจุดตะเกียงเรียงทวนเข็มนาฬิกาเท่านั้นสิ", 3f);
-            return;
-        }
+            if (ClueNoteManager.Instance?.IsClueShowing() == true) return;
+            if (!QuestManager.Instance?.HasSeenClueNote() == true)
+            {
+                DialogueManager.Instance?.Show("ดูเหมือนจะเป็นตะเกียงเก่าๆ", 2f);
+                return;
+            }
 
-        isLit = true;
-        lanternLight.enabled = true;
-        DialogueManager.Instance?.Show("จุดตะเกียงถูกต้องแล้ว", 2f);
-        LanternManager.Instance.LightLantern(lanternIndex);
+            if (!LanternManager.Instance.CanLightLantern(lanternIndex))
+            {
+                DialogueManager.Instance?.Show("จุดตะเกียงไม่ถูกต้อง...", 2f);
+                DialogueManager.Instance?.Queue("ต้องจุดตะเกียงเรียงทวนเข็มนาฬิกาเท่านั้นสิ", 3f);
+                return;
+            }
+
+            isLit = true;
+            lanternLight.enabled = true;
+            DialogueManager.Instance?.Show("จุดตะเกียงถูกต้องแล้ว", 2f);
+            LanternManager.Instance.LightLantern(lanternIndex);
+        }
     }
 
     // void ToggleLantern()

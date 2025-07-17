@@ -10,10 +10,10 @@ public class InspectableItem : MonoBehaviour
 
     [TextArea(2, 4)]
     public string[] dialogueLines;  // ✅ หลายข้อความ
-    private bool isPlayerNearby = false;
 
     public bool isKey = false;
     private bool hasCollectedKey = false;
+    private bool hasInteracted = false;
 
     // void Update()
     // {
@@ -49,25 +49,43 @@ public class InspectableItem : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        if (!Input.GetMouseButtonDown(0)) return;
         if (DialogueManager.Instance.IsShowing()) return;
+        if (hasInteracted) return;
 
-        if (!CanInspectBasedOnCondition()) return;
+        // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
+        bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
 
-        if (dialogueLines != null && dialogueLines.Length > 0)
+        if (mousePressed || gamepadPressed)
         {
-            DialogueManager.Instance?.Show(dialogueLines[0], 2f);
-            for (int i = 1; i < dialogueLines.Length; i++)
-                DialogueManager.Instance?.Queue(dialogueLines[i], 2f);
-        }
+            if (!CanInspectBasedOnCondition()) return;
 
-        if (isKey && !hasCollectedKey)
+            if (dialogueLines != null && dialogueLines.Length > 0)
+            {
+                DialogueManager.Instance?.Show(dialogueLines[0], 2f);
+                for (int i = 1; i < dialogueLines.Length; i++)
+                    DialogueManager.Instance?.Queue(dialogueLines[i], 2f);
+            }
+
+            if (isKey && !hasCollectedKey)
+            {
+                hasCollectedKey = true;
+                InspectManager.Instance?.SetKeyItem(this.gameObject);
+            }
+
+            InspectManager.Instance?.StartInspect(prefabToInspect, this.gameObject);
+
+            // ✅ ให้ InspectManager บอกให้ reset ตอนปิด
+            InspectManager.Instance?.SetInspectable(this);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
         {
-            hasCollectedKey = true;
-            InspectManager.Instance?.SetKeyItem(this.gameObject);
+            hasInteracted = false; // reset เมื่อออกจาก trigger
         }
-
-        InspectManager.Instance?.StartInspect(prefabToInspect, this.gameObject);
     }
 
     private bool CanInspectBasedOnCondition()
@@ -93,6 +111,12 @@ public class InspectableItem : MonoBehaviour
                 return false;
         }
     }
+
+    public void ResetInteract()
+    {
+        hasInteracted = false;
+    }
+
 
     // private void OnTriggerEnter(Collider other)
     // {

@@ -31,6 +31,7 @@ public class InspectManager : MonoBehaviour
 
     private StarterAssets.ThirdPersonController player;
     private GameObject persistentSpotlightGroup = null;
+    private InspectableItem activeInspectable = null;
 
     void Awake()
     {
@@ -55,32 +56,39 @@ public class InspectManager : MonoBehaviour
 
     void Update()
     {
-        if (isInspecting && currentItem != null)
+        // // 🔍 ซูมด้วย Scroll Wheel (เปลี่ยนเป็นเลื่อนเข้า-ออก)
+        // float scroll = Mouse.current.scroll.ReadValue().y;
+        // if (Mathf.Abs(scroll) > 0.01f)
+        // {
+        //     currentZoom -= scroll * zoomSpeed * 0.01f;
+        //     currentZoom = Mathf.Clamp(currentZoom, minZoomDistance, maxZoomDistance);
+
+        //     UpdateZoomPosition();
+        // }
+
+        if (!isInspecting || currentItem == null) return; // ✅ ป้องกัน null
+        
+        // 🖱 Mouse input
+        bool isMouseHeld = Mouse.current != null && Mouse.current.leftButton.isPressed;
+        Vector2 mouseDelta = isMouseHeld ? Mouse.current.delta.ReadValue() : Vector2.zero;
+
+        // 🎮 Gamepad input
+        Vector2 gamepadDelta = Gamepad.current != null ? Gamepad.current.rightStick.ReadValue() * 10f : Vector2.zero;
+
+        Vector2 finalDelta = mouseDelta != Vector2.zero ? mouseDelta : gamepadDelta;
+
+        if (finalDelta != Vector2.zero)
         {
-            if (Mouse.current.leftButton.isPressed)
-            {
-                float rotX = Mouse.current.delta.x.ReadValue();
-                float rotY = Mouse.current.delta.y.ReadValue();
+            currentItem.transform.Rotate(Vector3.up, -finalDelta.x, Space.World);
+            currentItem.transform.Rotate(Camera.main.transform.right, finalDelta.y, Space.World);
+        }
 
-                currentItem.transform.Rotate(Vector3.up, -rotX, Space.World);
-                currentItem.transform.Rotate(Camera.main.transform.right, rotY, Space.World);
-            }
+        bool mousePressed = Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame;
+        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame;
 
-            // // 🔍 ซูมด้วย Scroll Wheel (เปลี่ยนเป็นเลื่อนเข้า-ออก)
-            // float scroll = Mouse.current.scroll.ReadValue().y;
-            // if (Mathf.Abs(scroll) > 0.01f)
-            // {
-            //     currentZoom -= scroll * zoomSpeed * 0.01f;
-            //     currentZoom = Mathf.Clamp(currentZoom, minZoomDistance, maxZoomDistance);
-
-            //     UpdateZoomPosition();
-            // }
-
-            // ✅ คลิกขวาออกจาก Inspect
-            if (Input.GetMouseButtonDown(1))
-            {
-                EndInspect();
-            }
+        if (mousePressed || gamepadPressed)
+        {
+            EndInspect();
         }
     }
 
@@ -179,6 +187,12 @@ public class InspectManager : MonoBehaviour
         isInspecting = false;
 
         if (player != null) player.enabled = true;
+
+        if (activeInspectable != null)
+        {
+            activeInspectable.ResetInteract();
+            activeInspectable = null;
+        }
     }
 
     public bool IsInspecting() => isInspecting;
@@ -195,4 +209,10 @@ public class InspectManager : MonoBehaviour
     {
         keyItemInWorld = obj;
     }
+
+    public void SetInspectable(InspectableItem item)
+    {
+        activeInspectable = item;
+    }
+
 }

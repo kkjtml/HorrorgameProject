@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using StarterAssets;
 using Cinemachine;
+using UnityEngine.InputSystem;
 
 public class HideableCabinet : MonoBehaviour
 {
@@ -71,7 +72,11 @@ public class HideableCabinet : MonoBehaviour
     void Update()
     {
         if (!isPlayerNearby) return;
-        if (!Input.GetMouseButtonDown(0)) return;
+
+        // ✅ รองรับ Mouse Left Click และ Gamepad A (buttonSouth)
+        bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+        if (!mousePressed && !gamepadPressed) return;
 
         if (isHiding)
         {
