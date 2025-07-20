@@ -69,7 +69,11 @@ public class ClueNoteManager : MonoBehaviour
             }
         }
 
-        if (player != null) player.enabled = false;
+        if (player != null)
+        {
+            player.enabled = false;
+            Time.timeScale = 0f; // ✅ หยุดเวลา
+        }
 
         // ✅ รอจนกว่าจะกดคลิกขวาหรือ B
         yield return StartCoroutine(WaitForCloseInput());
@@ -103,7 +107,11 @@ public class ClueNoteManager : MonoBehaviour
 
         QuestManager.Instance?.OnClueNoteClosed(closedIndex);
 
-        if (player != null) player.enabled = true;
+        if (player != null)
+        {
+            player.enabled = true;
+            Time.timeScale = 1f; // ✅ กลับเวลาเป็นปกติ
+        }
 
         // ✅ Reset trigger
         ResetNearbyTrigger();

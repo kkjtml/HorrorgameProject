@@ -67,7 +67,7 @@ public class InspectManager : MonoBehaviour
         // }
 
         if (!isInspecting || currentItem == null) return; // ✅ ป้องกัน null
-        
+
         // 🖱 Mouse input
         bool isMouseHeld = Mouse.current != null && Mouse.current.leftButton.isPressed;
         Vector2 mouseDelta = isMouseHeld ? Mouse.current.delta.ReadValue() : Vector2.zero;
@@ -124,7 +124,11 @@ public class InspectManager : MonoBehaviour
         blackBackground.SetActive(true);
         isInspecting = true;
 
-        if (player != null) player.enabled = false;
+        if (player != null)
+        {
+            player.enabled = false;
+            Time.timeScale = 0f; // ✅ หยุดเวลา
+        }
     }
 
     private void CreateSpotLights(Transform parent)
@@ -186,7 +190,11 @@ public class InspectManager : MonoBehaviour
         blackBackground.SetActive(false);
         isInspecting = false;
 
-        if (player != null) player.enabled = true;
+        if (player != null)
+        {
+            player.enabled = true;
+            Time.timeScale = 1f; // ✅ กลับเวลาเป็นปกติ
+        }
 
         if (activeInspectable != null)
         {
