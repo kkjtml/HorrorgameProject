@@ -25,6 +25,8 @@ public class HideableCabinet : MonoBehaviour
     public CinemachineVirtualCamera mainVirtualCam;
     public CinemachineVirtualCamera cabinetVirtualCam;
 
+    private SelectionGlow[] allGlowItems;
+
     void Start()
     {
         GameObject playerGO = GameObject.FindGameObjectWithTag("Player");
@@ -100,6 +102,11 @@ public class HideableCabinet : MonoBehaviour
         playerController.enabled = false;
         playerController.ResetAnimation();
 
+        // 🎯 ปิดไฟฉายตอนซ่อน
+        var flashlight = playerController.flashlight;
+        if (flashlight != null)
+            flashlight.enabled = false;
+
         // 🎥 เปลี่ยนกล้องทันที
         if (mainCamera != null) mainCamera.SetActive(false);
         if (cabinetCamera != null) cabinetCamera.SetActive(true);
@@ -124,6 +131,11 @@ public class HideableCabinet : MonoBehaviour
         charController.enabled = true;
 
         playerController.enabled = true;
+
+        // เปิดไฟฉายเมื่อออกจากตู้
+        var flashlight = playerController.flashlight;
+        if (flashlight != null)
+            flashlight.enabled = true;
 
         // 🎥 สลับกลับกล้องหลัก
         if (cabinetCamera != null) cabinetCamera.SetActive(false);

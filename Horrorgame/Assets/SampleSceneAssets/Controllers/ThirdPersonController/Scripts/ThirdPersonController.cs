@@ -408,6 +408,10 @@ namespace StarterAssets
 
         private void ToggleFlashlight()
         {
+            // 🛑 ถ้า player ถูก disable (เช่นตอนซ่อน) → ห้ามเปิดไฟฉาย
+            if (!enabled || !gameObject.activeInHierarchy || flashlight == null)
+                return;
+
             if (_input.toggleFlashlight && flashlight != null)
             {
                 flashlightOn = !flashlightOn;
