@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 
 public class HideableCabinet : MonoBehaviour
 {
-    // public CabinetDoorController doorController;
+    public CabinetDoorController doorController;
     public Transform hidePoint;
     public Transform exitPoint;
 
@@ -29,6 +29,8 @@ public class HideableCabinet : MonoBehaviour
 
     void Start()
     {
+        allGlowItems = FindObjectsOfType<SelectionGlow>();
+
         GameObject playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
         {
@@ -73,6 +75,7 @@ public class HideableCabinet : MonoBehaviour
 
     void Update()
     {
+        
         if (!isPlayerNearby) return;
 
         // ✅ รองรับ Mouse Left Click และ Gamepad A (buttonSouth)
@@ -94,6 +97,9 @@ public class HideableCabinet : MonoBehaviour
     {
         if (playerController == null || charController == null) return;
 
+         // ✅ ปิดประตูทันทีเมื่อซ่อน
+        doorController?.Close();
+
         charController.enabled = false;
         player.transform.position = hidePoint.position;
         player.transform.rotation = Quaternion.LookRotation(hidePoint.forward);
@@ -101,6 +107,13 @@ public class HideableCabinet : MonoBehaviour
 
         playerController.enabled = false;
         playerController.ResetAnimation();
+
+        // ปิด Glow ทั้งหมดเมื่อซ่อน
+        if (allGlowItems != null)
+        {
+            foreach (var glow in allGlowItems)
+                glow.ForceDisableGlow(true);
+        }
 
         // 🎯 ปิดไฟฉายตอนซ่อน
         var flashlight = playerController.flashlight;
@@ -125,12 +138,22 @@ public class HideableCabinet : MonoBehaviour
     {
         if (playerController == null || charController == null) return;
 
+         // ✅ เปิดประตูทันทีเมื่อออกจากการซ่อน
+        doorController?.Open();
+
         charController.enabled = false;
         player.transform.position = exitPoint.position;
         player.transform.rotation = Quaternion.LookRotation(exitPoint.forward);
         charController.enabled = true;
 
         playerController.enabled = true;
+
+        // เปิด Glow กลับเมื่อออกจากตู้
+        if (allGlowItems != null)
+        {
+            foreach (var glow in allGlowItems)
+                glow.ForceDisableGlow(false); // เปิดกลับ ถ้าเข้าเงื่อนไข
+        }
 
         // เปิดไฟฉายเมื่อออกจากตู้
         var flashlight = playerController.flashlight;

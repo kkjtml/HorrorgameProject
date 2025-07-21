@@ -131,38 +131,71 @@ public class InspectManager : MonoBehaviour
         }
     }
 
+    // private void CreateSpotLights(Transform parent)
+    // {
+    //     Vector3 basePos = Camera.main.transform.position + Camera.main.transform.forward * 0.3f;
+
+    //     GameObject key = new GameObject("KeyLight");
+    //     key.transform.SetParent(parent);
+    //     key.transform.position = basePos + Camera.main.transform.forward * 0.6f + Vector3.up * 0.1f;
+    //     var light1 = key.AddComponent<Light>();
+    //     light1.intensity = 0.45f;
+    //     light1.range = 1.2f;
+    //     light1.color = new Color(1f, 0.97f, 0.92f);
+    //     light1.shadows = LightShadows.Soft;
+    //     light1.shadowStrength = 0.2f;
+
+    //     GameObject fill = new GameObject("FillLight");
+    //     fill.transform.SetParent(parent);
+    //     fill.transform.position = basePos + Camera.main.transform.right * 0.3f + Vector3.up * 0.05f;
+    //     var light2 = fill.AddComponent<Light>();
+    //     light2.intensity = 0.2f;
+    //     light2.range = 1.0f;
+    //     light2.color = new Color(0.8f, 0.85f, 1f);
+    //     light2.shadows = LightShadows.None;
+
+    //     GameObject rim = new GameObject("RimLight");
+    //     rim.transform.SetParent(parent);
+    //     rim.transform.position = basePos - Camera.main.transform.forward * 0.4f + Vector3.up * 0.1f;
+    //     var light3 = rim.AddComponent<Light>();
+    //     light3.intensity = 0.25f;
+    //     light3.range = 0.8f;
+    //     light3.color = Color.white;
+    //     light3.shadows = LightShadows.None;
+    // }
+
     private void CreateSpotLights(Transform parent)
-    {
-        Vector3 basePos = Camera.main.transform.position + Camera.main.transform.forward * 0.3f;
+{
+    Vector3 basePos = Camera.main.transform.position + Camera.main.transform.forward * 0.3f;
 
-        GameObject key = new GameObject("KeyLight");
-        key.transform.SetParent(parent);
-        key.transform.position = basePos + Camera.main.transform.forward * 0.6f + Vector3.up * 0.1f;
-        var light1 = key.AddComponent<Light>();
-        light1.intensity = 0.45f;
-        light1.range = 1.2f;
-        light1.color = new Color(1f, 0.97f, 0.92f);
-        light1.shadows = LightShadows.Soft;
-        light1.shadowStrength = 0.2f;
+    GameObject key = new GameObject("KeyLight");
+    key.transform.SetParent(parent);
+    key.transform.position = basePos + Camera.main.transform.forward * 0.6f + Vector3.up * 0.1f;
+    var light1 = key.AddComponent<Light>();
+    light1.intensity = 0.25f; // 🔻 ลดลงจาก 0.45f
+    light1.range = 1.0f;      // 🔻 ลดระยะ
+    light1.color = new Color(1f, 0.97f, 0.92f);
+    light1.shadows = LightShadows.Soft;
+    light1.shadowStrength = 0.2f;
 
-        GameObject fill = new GameObject("FillLight");
-        fill.transform.SetParent(parent);
-        fill.transform.position = basePos + Camera.main.transform.right * 0.3f + Vector3.up * 0.05f;
-        var light2 = fill.AddComponent<Light>();
-        light2.intensity = 0.2f;
-        light2.range = 1.0f;
-        light2.color = new Color(0.8f, 0.85f, 1f);
-        light2.shadows = LightShadows.None;
+    GameObject fill = new GameObject("FillLight");
+    fill.transform.SetParent(parent);
+    fill.transform.position = basePos + Camera.main.transform.right * 0.3f + Vector3.up * 0.05f;
+    var light2 = fill.AddComponent<Light>();
+    light2.intensity = 0.15f; // 🔻 ลดลงจาก 0.2f
+    light2.range = 1.0f;
+    light2.color = new Color(0.8f, 0.85f, 1f);
+    light2.shadows = LightShadows.None;
 
-        GameObject rim = new GameObject("RimLight");
-        rim.transform.SetParent(parent);
-        rim.transform.position = basePos - Camera.main.transform.forward * 0.4f + Vector3.up * 0.1f;
-        var light3 = rim.AddComponent<Light>();
-        light3.intensity = 0.25f;
-        light3.range = 0.8f;
-        light3.color = Color.white;
-        light3.shadows = LightShadows.None;
-    }
+    GameObject rim = new GameObject("RimLight");
+    rim.transform.SetParent(parent);
+    rim.transform.position = basePos - Camera.main.transform.forward * 0.4f + Vector3.up * 0.1f;
+    var light3 = rim.AddComponent<Light>();
+    light3.intensity = 0.15f; // 🔻 ลดจาก 0.25f
+    light3.range = 0.8f;
+    light3.color = Color.white;
+    light3.shadows = LightShadows.None;
+}
 
     public void EndInspect()
     {

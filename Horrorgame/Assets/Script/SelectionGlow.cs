@@ -24,9 +24,10 @@ public class SelectionGlow : MonoBehaviour
     [Header("CLOSE")]
     public GlowCondition glowDisableCondition = GlowCondition.Never;
 
-
     private GameObject glowObject;
     private GameObject player;
+
+    private bool forceDisable = false;
 
     void Start()
     {
@@ -83,6 +84,8 @@ public class SelectionGlow : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        if (forceDisable) return;
+
         if (other.CompareTag("Player") && glowObject != null && ShouldAllowGlow())
         {
             glowObject.SetActive(true);
@@ -91,9 +94,27 @@ public class SelectionGlow : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player") && glowObject != null)
+        if (glowObject != null)
         {
             glowObject.SetActive(false);
         }
+    }
+
+    public void SetGlowEnabled(bool enabled)
+    {
+        if (glowObject == null)
+            CreateGlowObject();
+
+        glowObject.SetActive(enabled && ShouldAllowGlow());
+    }
+
+
+    public void ForceDisableGlow(bool disable)
+    {
+        if (glowObject == null)
+            CreateGlowObject();
+
+        forceDisable = disable;
+        glowObject.SetActive(!forceDisable && ShouldAllowGlow());
     }
 }
