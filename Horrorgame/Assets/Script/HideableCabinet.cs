@@ -75,7 +75,7 @@ public class HideableCabinet : MonoBehaviour
 
     void Update()
     {
-        
+
         if (!isPlayerNearby) return;
 
         // ✅ รองรับ Mouse Left Click และ Gamepad A (buttonSouth)
@@ -97,8 +97,10 @@ public class HideableCabinet : MonoBehaviour
     {
         if (playerController == null || charController == null) return;
 
-         // ✅ ปิดประตูทันทีเมื่อซ่อน
+        // ✅ ปิดประตูทันทีเมื่อซ่อน
         doorController?.Close();
+
+        doorController?.SaveCurrentRotation(); // ✅ จำสถานะไว้ก่อนปิด
 
         charController.enabled = false;
         player.transform.position = hidePoint.position;
@@ -138,12 +140,14 @@ public class HideableCabinet : MonoBehaviour
     {
         if (playerController == null || charController == null) return;
 
-         // ✅ เปิดประตูทันทีเมื่อออกจากการซ่อน
+        doorController?.RestorePreviousRotation(); // ✅ คืน rotation กลับ
+
+        // ✅ เปิดประตูทันทีเมื่อออกจากการซ่อน
         doorController?.Open();
 
         charController.enabled = false;
         player.transform.position = exitPoint.position;
-        player.transform.rotation = Quaternion.LookRotation(exitPoint.forward);
+        player.transform.rotation = Quaternion.LookRotation(-exitPoint.forward);
         charController.enabled = true;
 
         playerController.enabled = true;

@@ -14,11 +14,18 @@ public class CabinetDoorController : MonoBehaviour
 
     private bool isOpen = false;
 
+    private Quaternion previousRotation; // ✅ จำค่าหมุนเดิมไว้ก่อนเข้า
+    private bool hasPreviousRotation = false;
+
+    public bool startOpened = true;  // ✅ ให้กำหนดได้จาก Inspector
+
     void Start()
     {
-        closedRotation = doorTransform.localRotation;
+        closedRotation = Quaternion.Euler(0, -5, 0);
         openRotation = Quaternion.Euler(closedRotation.eulerAngles + openRotationOffset);
-        targetRotation = closedRotation;
+
+        isOpen = startOpened;
+        targetRotation = isOpen ? openRotation : closedRotation;
     }
 
     void Update()
@@ -47,4 +54,19 @@ public class CabinetDoorController : MonoBehaviour
     }
 
     public bool IsOpen() => isOpen;
+
+    public void SaveCurrentRotation()
+    {
+        previousRotation = doorTransform.localRotation;
+        hasPreviousRotation = true;
+    }
+
+    public void RestorePreviousRotation()
+    {
+        if (hasPreviousRotation)
+        {
+            targetRotation = previousRotation;
+            isOpen = true; // ✅ ถือว่าเปิด
+        }
+    }
 }

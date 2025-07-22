@@ -115,6 +115,11 @@ public class SelectionGlow : MonoBehaviour
             CreateGlowObject();
 
         forceDisable = disable;
-        glowObject.SetActive(!forceDisable && ShouldAllowGlow());
+
+        if (disable)
+        {
+            // ปิดทันทีถ้า force ปิด
+            glowObject.SetActive(false);
+        }
     }
 }
