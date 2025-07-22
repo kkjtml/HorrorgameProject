@@ -9,6 +9,7 @@ public enum GlowCondition
     AfterClue2,
     AfterLanternDone,
     AfterClue3,
+    AfterLanternNotYetLit,
     Never
 }
 
@@ -77,6 +78,10 @@ public class SelectionGlow : MonoBehaviour
             case GlowCondition.AfterClue2: return QuestManager.Instance != null && QuestManager.Instance.HasSeenClue2();
             case GlowCondition.AfterLanternDone: return QuestManager.Instance != null && QuestManager.Instance.HasFinishedLanternQuest();
             case GlowCondition.AfterClue3: return QuestManager.Instance != null && QuestManager.Instance.HasSeenClue3();
+            case GlowCondition.AfterLanternNotYetLit:
+                return LanternManager.Instance != null &&
+                       gameObject.TryGetComponent<LanternController>(out var lantern) &&
+                       lantern.lanternIndex >= LanternManager.Instance.nextLanternIndex;
             case GlowCondition.Never: return false;
         }
         return false;

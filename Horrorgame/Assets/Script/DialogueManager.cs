@@ -101,6 +101,17 @@ public class DialogueManager : MonoBehaviour
         isShowing = false;
     }
 
+    public void ForceShow(string[] lines, float duration = -1f)
+    {
+        ClearCurrent(); // ✅ ล้างทุกข้อความก่อนเริ่มใหม่
+
+        if (lines == null || lines.Length == 0) return;
+
+        Show(lines[0], duration);
+        for (int i = 1; i < lines.Length; i++)
+            Queue(lines[i], duration);
+    }
+
     public bool IsShowing() => isShowing;
 
 

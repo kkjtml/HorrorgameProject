@@ -309,7 +309,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   glowMaterial: {fileID: 2100000, guid: f2fa835f2f0d1234f9101886cc8370b8, type: 2}
   glowEnableCondition: 0
-  glowDisableCondition: 5
+  glowDisableCondition: 6
 --- !u!4 &6247653701713550531 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6226437431748975972, guid: 2240ab747ebadbe408e9847ec734fecc, type: 3}

@@ -3,8 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class InspectableItem : MonoBehaviour
+public enum InspectableType
 {
+    InspectableAndDialogue,
+    DialogueOnly
+}
+
+public class InspectableItem : MonoBehaviour, IInteractable
+{
+    public InspectableType type = InspectableType.InspectableAndDialogue;
+
     public GameObject prefabToInspect;
     public InspectCondition condition = InspectCondition.Always;
 
@@ -14,6 +22,8 @@ public class InspectableItem : MonoBehaviour
     public bool isKey = false;
     private bool hasCollectedKey = false;
     private bool hasInteracted = false;
+
+    private bool isInspectingNow = false;
 
     // void Update()
     // {
@@ -46,47 +56,84 @@ public class InspectableItem : MonoBehaviour
     //     }
     // }
 
-    private void OnTriggerStay(Collider other)
+    // private void OnTriggerStay(Collider other)
+    // {
+    //     if (!other.CompareTag("Player")) return;
+    //     if (DialogueManager.Instance.IsShowing()) return;
+    //     if (hasInteracted) return;
+
+    //     // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
+    //     bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+    //     bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+
+    //     if (mousePressed || gamepadPressed)
+    //     {
+    //         if (!CanInspectBasedOnCondition()) return;
+
+    //         if (dialogueLines != null && dialogueLines.Length > 0)
+    //         {
+    //             DialogueManager.Instance?.Show(dialogueLines[0], 2f);
+    //             for (int i = 1; i < dialogueLines.Length; i++)
+    //                 DialogueManager.Instance?.Queue(dialogueLines[i], 2f);
+    //         }
+
+    //         if (isKey && !hasCollectedKey)
+    //         {
+    //             hasCollectedKey = true;
+    //             InspectManager.Instance?.SetKeyItem(this.gameObject);
+    //         }
+
+    //         InspectManager.Instance?.StartInspect(prefabToInspect, this.gameObject);
+
+    //         // ✅ ให้ InspectManager บอกให้ reset ตอนปิด
+    //         InspectManager.Instance?.SetInspectable(this);
+    //     }
+    // }
+
+    public void Interact()
     {
-        if (!other.CompareTag("Player")) return;
-        if (DialogueManager.Instance.IsShowing()) return;
-        if (hasInteracted) return;
+        if (isInspectingNow || hasInteracted) return; // ✅ ป้องกันซ้ำ
 
-        // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
-        bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
-        bool gamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
+        Debug.Log("🔍 Interact called on " + gameObject.name);
 
-        if (mousePressed || gamepadPressed)
+        if (!CanInspectBasedOnCondition())
         {
-            if (!CanInspectBasedOnCondition()) return;
-
-            if (dialogueLines != null && dialogueLines.Length > 0)
-            {
-                DialogueManager.Instance?.Show(dialogueLines[0], 2f);
-                for (int i = 1; i < dialogueLines.Length; i++)
-                    DialogueManager.Instance?.Queue(dialogueLines[i], 2f);
-            }
-
-            if (isKey && !hasCollectedKey)
-            {
-                hasCollectedKey = true;
-                InspectManager.Instance?.SetKeyItem(this.gameObject);
-            }
-
-            InspectManager.Instance?.StartInspect(prefabToInspect, this.gameObject);
-
-            // ✅ ให้ InspectManager บอกให้ reset ตอนปิด
-            InspectManager.Instance?.SetInspectable(this);
+            Debug.LogWarning("⛔ Cannot inspect due to condition: " + condition);
+            return;
         }
+
+        isInspectingNow = true;
+        hasInteracted = true;
+
+        if (dialogueLines != null && dialogueLines.Length > 0)
+        {
+            DialogueManager.Instance?.ForceShow(dialogueLines, 2f);
+        }
+
+        if (type == InspectableType.DialogueOnly)
+        {
+            // ✅ แค่พูด ไม่ต้อง inspect
+            isInspectingNow = false;
+            return;
+        }
+
+        if (isKey && !hasCollectedKey)
+        {
+            hasCollectedKey = true;
+            InspectManager.Instance?.SetKeyItem(this.gameObject);
+        }
+
+        InspectManager.Instance?.StartInspect(prefabToInspect, this.gameObject);
+        InspectManager.Instance?.SetInspectable(this);
     }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            hasInteracted = false; // reset เมื่อออกจาก trigger
-        }
-    }
+    // private void OnTriggerExit(Collider other)
+    // {
+    //     if (other.CompareTag("Player"))
+    //     {
+    //         // hasInteracted = false; // reset เมื่อออกจาก trigger
+    //     }
+    // }
 
     private bool CanInspectBasedOnCondition()
     {
@@ -111,10 +158,24 @@ public class InspectableItem : MonoBehaviour
                 return false;
         }
     }
-
     public void ResetInteract()
     {
         hasInteracted = false;
+        isInspectingNow = false;
+    }
+
+    public void SetHighlighted(bool highlighted)
+    {
+        SelectionGlow glow = GetComponent<SelectionGlow>();
+        if (glow != null)
+        {
+            glow.SetGlowEnabled(highlighted);
+        }
+    }
+
+    public bool CanBeInteracted()
+    {
+        return !hasInteracted && !isInspectingNow && CanInspectBasedOnCondition();
     }
 
 

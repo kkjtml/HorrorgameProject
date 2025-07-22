@@ -26,6 +26,8 @@ public class DoorController : MonoBehaviour
     private Quaternion openRotation;   // Y = 0 (หรือ 180 ถ้าเปลี่ยน)
     private Quaternion targetRotation;
 
+    private bool hasAutoOpened = false;
+
     void Start()
     {
         closedRotation = doorTransform.localRotation;
@@ -63,6 +65,14 @@ public class DoorController : MonoBehaviour
                     }
                     break;
             }
+        }
+
+        if (isUnlocked && !hasAutoOpened)
+        {
+            // แง้ม 30 องศาโดยอัตโนมัติ
+            Quaternion slightlyOpen = Quaternion.Euler(closedRotation.eulerAngles + new Vector3(0, openRotationOffset.y * 0.33f, 0));
+            targetRotation = slightlyOpen;
+            hasAutoOpened = true;
         }
 
         // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
