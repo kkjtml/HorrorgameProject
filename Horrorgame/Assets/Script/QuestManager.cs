@@ -102,7 +102,7 @@ public class QuestManager : MonoBehaviour
         else if (clueIndex == 1 && !hasSeenClue2)
         {
             hasSeenClue2 = true;
-            subQuestText.text = "เรียงภาพปริศนา";
+            subQuestText.text = "สำรวจห้องตรงข้าม";
         }
         else if (clueIndex == 2 && !hasSeenClue3)
         {
@@ -111,9 +111,15 @@ public class QuestManager : MonoBehaviour
         }
     }
 
+    public bool IsSearchingOppositeRoom()
+    {
+        return subQuestText != null && subQuestText.text == "สำรวจห้องตรงข้าม";
+    }
+
+
     public bool IsSearchingForMysteryPhoto()
     {
-        return subQuestText != null && subQuestText.text == "เรียงภาพปริศนา";
+        return subQuestText != null && subQuestText.text == "หาคำใบ้และเรียงภาพปริศนา";
     }
 
     public void OnFoundKey()
@@ -132,5 +138,9 @@ public class QuestManager : MonoBehaviour
         subQuestText.text = "สำรวจป่าทึบ";
     }
 
+    public void SetSubObjective(string text)
+    {
+        subQuestText.text = text;
+    }
 
 }

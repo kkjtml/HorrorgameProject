@@ -50,7 +50,7 @@ public class DoorController : MonoBehaviour
                     break;
 
                 case DoorUnlockCondition.PuzzlePictureQuest:
-                    if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingForMysteryPhoto())
+                    if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingOppositeRoom())
                     {
                         isUnlocked = true;
                         Debug.Log("✅ ปลดล็อกเพราะเริ่มเควสภาพปริศนาแล้ว");

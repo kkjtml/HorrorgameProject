@@ -58,12 +58,14 @@ public class PicturePuzzleTrigger : MonoBehaviour, IInteractable
 
     public void Interact()
     {
-        if (hasInteracted) return;
-        hasInteracted = true;
-
         if (PicturePuzzleUI.Instance != null && PicturePuzzleUI.Instance.IsPuzzleCompleted()) return;
 
-        if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingForMysteryPhoto())
+        if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingOppositeRoom())
+        {
+            QuestManager.Instance?.SetSubObjective("หาคำใบ้และเรียงภาพปริศนา");
+            PicturePuzzleUI.Instance?.OpenPuzzle();
+        }
+        else if (QuestManager.Instance != null && QuestManager.Instance.IsSearchingForMysteryPhoto())
         {
             PicturePuzzleUI.Instance?.OpenPuzzle();
         }
@@ -91,4 +93,5 @@ public class PicturePuzzleTrigger : MonoBehaviour, IInteractable
     {
         hasInteracted = false;
     }
+
 }
