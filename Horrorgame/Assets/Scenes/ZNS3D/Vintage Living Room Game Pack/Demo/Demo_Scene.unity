@@ -11515,6 +11515,26 @@ PrefabInstance:
       propertyPath: sharedShakeEffect
       value: 
       objectReference: {fileID: 680628759}
+    - target: {fileID: 5158789419239788718, guid: 90c91f975cbaa3c49b19254ba7816371, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5158789419239788718, guid: 90c91f975cbaa3c49b19254ba7816371, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5158789419239788718, guid: 90c91f975cbaa3c49b19254ba7816371, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5158789419239788718, guid: 90c91f975cbaa3c49b19254ba7816371, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5158789419239788718, guid: 90c91f975cbaa3c49b19254ba7816371, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7457782084828618071, guid: 90c91f975cbaa3c49b19254ba7816371, type: 3}
       propertyPath: m_Lens.m_SensorSize.x
       value: 24.89
