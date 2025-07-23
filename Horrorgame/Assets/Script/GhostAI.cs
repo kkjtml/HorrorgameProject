@@ -46,6 +46,8 @@ public class GhostAI : MonoBehaviour
     public float runSpeed = 3.5f;
     public float patrolSpeed = 1.2f;
 
+    private DoorController playerTargetDoor = null;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -240,16 +242,21 @@ public class GhostAI : MonoBehaviour
 
     void ChasePlayer()
     {
-        if (IsPlayerHidden())
-        {
-            ChangeState(GhostState.Return);
-            return;
-        }
-
-        if ((agent.destination - player.position).sqrMagnitude > 0.2f)
-            agent.SetDestination(player.position);
-
+        // ไล่ตามตำแหน่งผู้เล่น
+        agent.SetDestination(player.position);
         lastKnownPlayerPosition = player.position;
+
+        // ตรวจจับประตูด้านหน้า (Raycast 1 เมตร)
+        Ray ray = new Ray(transform.position + Vector3.up * 0.5f, transform.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, 1.2f))
+        {
+            DoorController door = hit.collider.GetComponent<DoorController>();
+            if (door != null && !door.IsOpen() && door.IsUnlocked())
+            {
+                door.OpenByGhost();
+                Debug.Log("👻 ผีเจอประตูขวางเลยเปิด: " + door.name);
+            }
+        }
 
         if (Vector3.Distance(transform.position, player.position) > suspiciousDistance)
         {
@@ -273,7 +280,18 @@ public class GhostAI : MonoBehaviour
     {
         if (!agent.pathPending && agent.remainingDistance < 0.5f)
         {
+            CloseNearbyDoors();
             ChangeState(GhostState.Patrol);
+        }
+
+        if (playerTargetDoor != null && playerTargetDoor.IsOpen())
+        {
+            float dist = Vector3.Distance(transform.position, playerTargetDoor.transform.position);
+            if (dist > 2.5f) // ออกจากห้องแล้ว
+            {
+                playerTargetDoor.CloseByGhost();
+                playerTargetDoor = null;
+            }
         }
     }
 
@@ -297,5 +315,30 @@ public class GhostAI : MonoBehaviour
 
         return false;
     }
+
+    void CloseNearbyDoors()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, 1.5f);
+        foreach (var hit in hits)
+        {
+            DoorController door = hit.GetComponent<DoorController>();
+            if (door != null && door.IsOpen())
+            {
+                door.CloseByGhost();
+            }
+        }
+    }
+
+    public void SetPlayerTargetDoor(DoorController door)
+    {
+        playerTargetDoor = door;
+    }
+
+    public bool IsChasing()
+    {
+        return currentState == GhostState.Chase;
+    }
+
+
 }
 

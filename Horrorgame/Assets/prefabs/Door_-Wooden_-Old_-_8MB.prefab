@@ -53,6 +53,54 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 101.40475, y: 229.99998, z: 12.1669235}
   m_Center: {x: 49.9323, y: 114.999016, z: 4.466685}
+--- !u!1 &5713948052890225741
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2364024455965309189}
+  - component: {fileID: 980867311891724172}
+  m_Layer: 0
+  m_Name: DoorBlocker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2364024455965309189
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5713948052890225741}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 46.9, y: 125.4, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6247653701713550531}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!208 &980867311891724172
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5713948052890225741}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 0
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1001 &62100598565994919
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -220,6 +268,9 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 6226437431748975972, guid: 2240ab747ebadbe408e9847ec734fecc, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 2364024455965309189}
+    - targetCorrespondingSourceObject: {fileID: 6226437431748975972, guid: 2240ab747ebadbe408e9847ec734fecc, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 5296075683080156915}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 182917006606322633, guid: 2240ab747ebadbe408e9847ec734fecc, type: 3}
@@ -256,6 +307,7 @@ MonoBehaviour:
   openRotationOffset: {x: 0, y: -90, z: 0}
   openSpeed: 2
   unlockCondition: 0
+  navObstacle: {fileID: 980867311891724172}
 --- !u!1 &3972843840129910291 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -5188498312816801868, guid: 2240ab747ebadbe408e9847ec734fecc, type: 3}

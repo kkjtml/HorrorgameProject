@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.AI;
 
 public enum DoorUnlockCondition
 {
@@ -28,8 +29,13 @@ public class DoorController : MonoBehaviour
 
     private bool hasAutoOpened = false;
 
+    [SerializeField] private NavMeshObstacle navObstacle;
+
     void Start()
     {
+        if (navObstacle != null)
+            navObstacle.enabled = !isOpen;
+
         closedRotation = doorTransform.localRotation;
         openRotation = Quaternion.Euler(closedRotation.eulerAngles + openRotationOffset);
         targetRotation = closedRotation;
@@ -105,6 +111,9 @@ public class DoorController : MonoBehaviour
         isOpen = !isOpen;
         targetRotation = isOpen ? openRotation : closedRotation;
 
+        if (navObstacle != null)
+            navObstacle.enabled = !isOpen; // เปิดประตู = ปิด obstacle
+
         Debug.Log("🌀 Door toggled to: " + (isOpen ? "OPEN" : "CLOSED"));
     }
 
@@ -118,4 +127,36 @@ public class DoorController : MonoBehaviour
         isUnlocked = true;
         Debug.Log("🔓 ประตูนี้ถูกปลดล็อกด้วยกุญแจ inspect");
     }
+
+    public bool IsOpen() => isOpen;
+
+    public void OpenByGhost()
+    {
+        if (!isOpen)
+        {
+            isOpen = true;
+            targetRotation = openRotation;
+            if (navObstacle != null)
+                navObstacle.enabled = false;
+
+            Debug.Log("👻 ผีเปิดประตู");
+        }
+    }
+
+    public void CloseByGhost()
+    {
+        if (isOpen)
+        {
+            isOpen = false;
+            targetRotation = closedRotation;
+            if (navObstacle != null)
+                navObstacle.enabled = true;
+
+            Debug.Log("🚪 ผีปิดประตู");
+        }
+    }
+
+    public bool IsUnlocked() => isUnlocked;
+
+
 }
