@@ -684,3 +684,4 @@ MonoBehaviour:
   sharedShakeEffect: {fileID: 0}
   mainVirtualCam: {fileID: 0}
   cabinetVirtualCam: {fileID: 7457782084828618071}
+  ghostTargetPoint: {fileID: 5158789419239788718}

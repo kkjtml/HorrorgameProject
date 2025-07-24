@@ -28,6 +28,7 @@ public class DoorController : MonoBehaviour
     private Quaternion targetRotation;
 
     private bool hasAutoOpened = false;
+    public GameObject doorBlocker;
 
     [SerializeField] private NavMeshObstacle navObstacle;
 
@@ -79,6 +80,10 @@ public class DoorController : MonoBehaviour
             Quaternion slightlyOpen = Quaternion.Euler(closedRotation.eulerAngles + new Vector3(0, openRotationOffset.y * 0.33f, 0));
             targetRotation = slightlyOpen;
             hasAutoOpened = true;
+
+            // ✅ ปิด obstacle ตอนแง้มประตู
+            if (navObstacle != null)
+                navObstacle.enabled = false;
         }
 
         // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
@@ -111,8 +116,8 @@ public class DoorController : MonoBehaviour
         isOpen = !isOpen;
         targetRotation = isOpen ? openRotation : closedRotation;
 
-        if (navObstacle != null)
-            navObstacle.enabled = !isOpen; // เปิดประตู = ปิด obstacle
+        if (doorBlocker != null)
+            doorBlocker.SetActive(!isOpen); // เปิดประตู = ปิด blocker
 
         Debug.Log("🌀 Door toggled to: " + (isOpen ? "OPEN" : "CLOSED"));
     }

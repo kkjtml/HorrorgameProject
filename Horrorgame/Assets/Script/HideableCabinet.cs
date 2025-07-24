@@ -27,6 +27,8 @@ public class HideableCabinet : MonoBehaviour
 
     private SelectionGlow[] allGlowItems;
 
+    public Transform ghostTargetPoint;
+
     void Start()
     {
         allGlowItems = FindObjectsOfType<SelectionGlow>();
@@ -133,12 +135,29 @@ public class HideableCabinet : MonoBehaviour
         GhostAI.Instance?.SetPlayerHidden(true);
         isHiding = true;
 
+        if (GhostAI.Instance != null)
+        {
+            GhostAI.Instance.SetPlayerHidden(true);
+            GhostAI.Instance.GoToCabinet(ghostTargetPoint.position, doorController.GetComponent<DoorController>());
+        }
+
         Debug.Log("🛏️ Player is now hiding");
     }
 
     private void ExitCabinet()
     {
         if (playerController == null || charController == null) return;
+
+        // ✅ แจ้งก่อนว่า player ไม่ได้ซ่อนแล้ว
+        GhostAI.Instance?.SetPlayerHidden(false);
+
+        // 🛠️ ถ้าผีกำลังไล่ → เคลียร์ memory ไม่ให้มันปิดประตูห้อง
+        if (GhostAI.Instance != null && GhostAI.Instance.IsChasing())
+        {
+            GhostAI.Instance.CancelCabinetMemory();
+        }
+
+        isHiding = false;
 
         doorController?.RestorePreviousRotation(); // ✅ คืน rotation กลับ
 

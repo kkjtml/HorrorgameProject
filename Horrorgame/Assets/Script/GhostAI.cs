@@ -48,6 +48,8 @@ public class GhostAI : MonoBehaviour
 
     private DoorController playerTargetDoor = null;
 
+    private bool justVisitedCabinet = false;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -76,10 +78,17 @@ public class GhostAI : MonoBehaviour
         if (IsPlayerHidden())
         {
             if (!isWaitingAtCabinet &&
-        (currentState == GhostState.Chase || currentState == GhostState.Suspicious || currentState == GhostState.Search))
+                (currentState == GhostState.Chase || currentState == GhostState.Suspicious || currentState == GhostState.Search))
             {
                 StartCoroutine(WaitBeforeReturn());
             }
+
+            // ✅ ยอมให้เดิน patrol ได้ถ้าอยู่ในสถานะ Idle/Patrol
+            if (currentState == GhostState.Idle || currentState == GhostState.Patrol)
+            {
+                Patrol();
+            }
+
             return;
         }
 
@@ -112,6 +121,8 @@ public class GhostAI : MonoBehaviour
                 ReturnToPatrol();
                 break;
         }
+
+        TryClosePlayerDoor();
     }
 
     private IEnumerator WaitBeforeReturn()
@@ -146,9 +157,10 @@ public class GhostAI : MonoBehaviour
             yield return null;
         }
 
-        // ถ้าครบ 2 วิแล้วยังไม่เห็น → กลับ patrol
         agent.isStopped = false;
-        ChangeState(GhostState.Return);
+        agent.ResetPath();
+        agent.SetDestination(patrolPoints[patrolIndex].position);
+        ChangeState(GhostState.Patrol);
         isWaitingAtCabinet = false;
     }
 
@@ -242,21 +254,27 @@ public class GhostAI : MonoBehaviour
 
     void ChasePlayer()
     {
-        // ไล่ตามตำแหน่งผู้เล่น
-        agent.SetDestination(player.position);
-        lastKnownPlayerPosition = player.position;
-
-        // ตรวจจับประตูด้านหน้า (Raycast 1 เมตร)
-        Ray ray = new Ray(transform.position + Vector3.up * 0.5f, transform.forward);
-        if (Physics.Raycast(ray, out RaycastHit hit, 1.2f))
+        if (playerTargetDoor != null)
         {
-            DoorController door = hit.collider.GetComponent<DoorController>();
-            if (door != null && !door.IsOpen() && door.IsUnlocked())
+            agent.SetDestination(player.position);
+
+            float distanceToDoor = Vector3.Distance(transform.position, playerTargetDoor.transform.position);
+
+            // ✅ ถ้าใกล้ประตูพอ และประตูยังปิด → ให้ผีเปิด
+            if (!playerTargetDoor.IsOpen() && playerTargetDoor.IsUnlocked() && distanceToDoor < 1.5f)
             {
-                door.OpenByGhost();
-                Debug.Log("👻 ผีเจอประตูขวางเลยเปิด: " + door.name);
+                playerTargetDoor.OpenByGhost();
+                Debug.Log("👻 ผีเปิดประตูเป้าหมาย");
             }
+            // ✅ ถ้าประตูเปิดอยู่ → ไม่ต้องทำอะไร ผีจะวิ่งผ่านได้เอง
         }
+        else
+        {
+            // ไม่มี target door → ไล่ผู้เล่นตามปกติ
+            agent.SetDestination(player.position);
+        }
+
+        lastKnownPlayerPosition = player.position;
 
         if (Vector3.Distance(transform.position, player.position) > suspiciousDistance)
         {
@@ -278,9 +296,21 @@ public class GhostAI : MonoBehaviour
 
     void ReturnToPatrol()
     {
+        TryClosePlayerDoor();
+
+        if (justVisitedCabinet && playerTargetDoor != null)
+        {
+            playerTargetDoor.CloseByGhost();
+            justVisitedCabinet = false;
+            Debug.Log("🚪 ผีปิดประตูหลังจากออกจากหน้าตู้");
+        }
         if (!agent.pathPending && agent.remainingDistance < 0.5f)
         {
             CloseNearbyDoors();
+
+            // ✅ รีเซ็ต path ก่อนเปลี่ยนปลายทางใหม่
+            agent.ResetPath();
+            agent.SetDestination(patrolPoints[patrolIndex].position);
             ChangeState(GhostState.Patrol);
         }
 
@@ -339,6 +369,50 @@ public class GhostAI : MonoBehaviour
         return currentState == GhostState.Chase;
     }
 
+    public void GoToCabinet(Vector3 targetPosition, DoorController door = null)
+    {
+        float dist = Vector3.Distance(transform.position, targetPosition);
 
+        // ✅ สนใจเฉพาะเห็นผู้เล่นก่อนหน้านี้
+        if (currentState != GhostState.Chase && currentState != GhostState.Suspicious)
+        {
+            Debug.Log("👻 ผีไม่สนตู้เพราะอยู่ไกลและไม่ไล่");
+            return;
+        }
+
+        agent.isStopped = false;
+        agent.speed = patrolSpeed;
+        agent.SetDestination(targetPosition);
+        animator.Play("Walk");
+
+        justVisitedCabinet = true;
+
+        if (door != null)
+            playerTargetDoor = door;
+
+        Debug.Log("👻 ผีกำลังเดินมาหน้าตู้...");
+    }
+
+    private void TryClosePlayerDoor()
+    {
+        if (justVisitedCabinet && playerTargetDoor != null)
+        {
+            float dist = Vector3.Distance(transform.position, playerTargetDoor.transform.position);
+
+            if (dist > 2.5f) // ✅ เดินห่างออกมาพอแล้ว
+            {
+                playerTargetDoor.CloseByGhost();
+                playerTargetDoor = null;
+                justVisitedCabinet = false;
+
+                Debug.Log("🚪 ผีปิดประตูหลังจากออกห่างตู้แล้ว");
+            }
+        }
+    }
+
+    public void CancelCabinetMemory()
+    {
+        justVisitedCabinet = false;
+    }
 }
 
