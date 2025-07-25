@@ -42,9 +42,9 @@ public class GhostAI : MonoBehaviour
     private bool isWaitingAtCabinet = false;
 
     [Header("Ghost Movement Speeds")]
-    public float walkSpeed = 1.5f;
-    public float runSpeed = 3.5f;
-    public float patrolSpeed = 1.2f;
+    public float walkSpeed = 1f;
+    public float runSpeed = 1.5f;
+    public float patrolSpeed = 1f;
 
     private DoorController playerTargetDoor = null;
 
@@ -212,7 +212,7 @@ public class GhostAI : MonoBehaviour
                 break;
 
             case GhostState.Chase:
-                agent.speed = runSpeed; // ✅ ผีไล่ด้วยความเร็วนี้
+                agent.speed = runSpeed;
                 agent.isStopped = false;
                 animator.Play("Run");
                 break;
@@ -254,29 +254,82 @@ public class GhostAI : MonoBehaviour
 
     void ChasePlayer()
     {
-        if (playerTargetDoor != null)
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        // 👇 เพิ่มเช็คการชนก่อนเคลื่อนที่
+        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, transform.forward, out RaycastHit hit, 0.6f))
         {
-            agent.SetDestination(player.position);
-
-            float distanceToDoor = Vector3.Distance(transform.position, playerTargetDoor.transform.position);
-
-            // ✅ ถ้าใกล้ประตูพอ และประตูยังปิด → ให้ผีเปิด
-            if (!playerTargetDoor.IsOpen() && playerTargetDoor.IsUnlocked() && distanceToDoor < 1.5f)
+            if (hit.collider.CompareTag("Wall"))
             {
-                playerTargetDoor.OpenByGhost();
-                Debug.Log("👻 ผีเปิดประตูเป้าหมาย");
+                // ✨ แก้ตรงนี้
+                Vector3 avoidanceDir = Quaternion.Euler(0, 60f, 0) * transform.forward;
+                Vector3 newTarget = transform.position + avoidanceDir;
+                NavMeshPath path = new NavMeshPath();
+                if (agent.CalculatePath(newTarget, path) && path.status == NavMeshPathStatus.PathComplete)
+                {
+                    agent.SetPath(path);
+                    agent.isStopped = false;
+                    animator.Play("Run");
+                    Debug.Log("↩ ผีเลี้ยวหลบกำแพง (Path ok)");
+                }
+                else
+                {
+                    agent.isStopped = true;
+                    animator.Play("Idle");
+                    Debug.Log("🛑 ผีเลี้ยวไม่ได้ (ไม่มี NavMesh Path)");
+                }
+
+                return;
             }
-            // ✅ ถ้าประตูเปิดอยู่ → ไม่ต้องทำอะไร ผีจะวิ่งผ่านได้เอง
+        }
+
+        if (distanceToPlayer > 1.2f)
+        {
+            Vector3 destination = player.position;
+
+            // ป้องกันวาร์ปทะลุผนัง
+            if (NavMesh.SamplePosition(player.position, out NavMeshHit navHit, 1.0f, NavMesh.AllAreas))
+            {
+                destination = navHit.position;
+            }
+
+            agent.isStopped = false;
+            agent.SetDestination(destination);
+
+            if (playerTargetDoor != null)
+            {
+                float distanceToDoor = Vector3.Distance(transform.position, playerTargetDoor.transform.position);
+                if (!playerTargetDoor.IsOpen() && playerTargetDoor.IsUnlocked() && distanceToDoor < 1.5f)
+                {
+                    playerTargetDoor.OpenByGhost(); // 💥 force เปิดประตู + ปิด blocker
+                    Debug.Log("👻 ผีเปิดประตูเป้าหมาย");
+                }
+            }
+
+            animator.Play("Run");
         }
         else
         {
-            // ไม่มี target door → ไล่ผู้เล่นตามปกติ
-            agent.SetDestination(player.position);
+            if (!agent.isStopped)
+            {
+                agent.ResetPath();
+                agent.isStopped = true;
+            }
+
+            Vector3 lookDir = player.position - transform.position;
+            lookDir.y = 0;
+            if (lookDir.magnitude > 0.1f)
+            {
+                Quaternion rot = Quaternion.LookRotation(lookDir);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 2f);
+            }
+
+            animator.Play("Idle");
         }
 
         lastKnownPlayerPosition = player.position;
 
-        if (Vector3.Distance(transform.position, player.position) > suspiciousDistance)
+        if (distanceToPlayer > suspiciousDistance)
         {
             ChangeState(GhostState.Search);
         }

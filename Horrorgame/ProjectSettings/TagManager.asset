@@ -6,6 +6,7 @@ TagManager:
   tags:
   - CinemachineTarget
   - Pickup
+  - Wall
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - Not in Reflection
   - Interactable
   - Wall
-  - 
+  - Ghost
   - 
   - 
   - 

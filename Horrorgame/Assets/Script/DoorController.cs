@@ -28,15 +28,9 @@ public class DoorController : MonoBehaviour
     private Quaternion targetRotation;
 
     private bool hasAutoOpened = false;
-    public GameObject doorBlocker;
-
-    [SerializeField] private NavMeshObstacle navObstacle;
 
     void Start()
     {
-        if (navObstacle != null)
-            navObstacle.enabled = !isOpen;
-
         closedRotation = doorTransform.localRotation;
         openRotation = Quaternion.Euler(closedRotation.eulerAngles + openRotationOffset);
         targetRotation = closedRotation;
@@ -80,10 +74,6 @@ public class DoorController : MonoBehaviour
             Quaternion slightlyOpen = Quaternion.Euler(closedRotation.eulerAngles + new Vector3(0, openRotationOffset.y * 0.33f, 0));
             targetRotation = slightlyOpen;
             hasAutoOpened = true;
-
-            // ✅ ปิด obstacle ตอนแง้มประตู
-            if (navObstacle != null)
-                navObstacle.enabled = false;
         }
 
         // ✅ รองรับ Mouse Left Click หรือ Gamepad Button South (A / X)
@@ -116,9 +106,6 @@ public class DoorController : MonoBehaviour
         isOpen = !isOpen;
         targetRotation = isOpen ? openRotation : closedRotation;
 
-        if (doorBlocker != null)
-            doorBlocker.SetActive(!isOpen); // เปิดประตู = ปิด blocker
-
         Debug.Log("🌀 Door toggled to: " + (isOpen ? "OPEN" : "CLOSED"));
     }
 
@@ -134,15 +121,12 @@ public class DoorController : MonoBehaviour
     }
 
     public bool IsOpen() => isOpen;
-
     public void OpenByGhost()
     {
         if (!isOpen)
         {
             isOpen = true;
             targetRotation = openRotation;
-            if (navObstacle != null)
-                navObstacle.enabled = false;
 
             Debug.Log("👻 ผีเปิดประตู");
         }
@@ -154,14 +138,25 @@ public class DoorController : MonoBehaviour
         {
             isOpen = false;
             targetRotation = closedRotation;
-            if (navObstacle != null)
-                navObstacle.enabled = true;
-
             Debug.Log("🚪 ผีปิดประตู");
         }
     }
 
     public bool IsUnlocked() => isUnlocked;
 
+    // public void DisableObstacle()
+    // {
+    //     if (navObstacle != null)
+    //     {
+    //         navObstacle.enabled = false;
+    //         navObstacle.carving = false;
+    //         Debug.Log("🚪 Obstacle ถูกปิดโดยผี");
+    //     }
+
+    //     if (doorBlocker != null)
+    //     {
+    //         doorBlocker.SetActive(false); // ถ้ามีตัว block ธรรมดา
+    //     }
+    // }
 
 }
