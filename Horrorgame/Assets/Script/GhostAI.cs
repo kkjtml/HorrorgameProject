@@ -42,9 +42,9 @@ public class GhostAI : MonoBehaviour
     private bool isWaitingAtCabinet = false;
 
     [Header("Ghost Movement Speeds")]
-    public float walkSpeed = 1f;
-    public float runSpeed = 1.5f;
-    public float patrolSpeed = 1f;
+    public float walkSpeed = 2f;
+    public float runSpeed = 3.5f;
+    public float patrolSpeed = 2f;
 
     private DoorController playerTargetDoor = null;
 
@@ -66,6 +66,13 @@ public class GhostAI : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
         ChangeState(GhostState.Patrol);
+    }
+
+    void SetAnimState(bool walk, bool run, bool lookAround)
+    {
+        animator.SetBool("isWalking", walk);
+        animator.SetBool("isRunning", run);
+        animator.SetBool("isLookingAround", lookAround);
     }
 
     void Update()
@@ -195,39 +202,39 @@ public class GhostAI : MonoBehaviour
         {
             case GhostState.Idle:
                 agent.isStopped = true;
-                animator.Play("Idle");
+                SetAnimState(true, false, false);
                 break;
 
             case GhostState.Patrol:
                 agent.speed = patrolSpeed;
                 agent.isStopped = false;
                 agent.SetDestination(patrolPoints[patrolIndex].position);
-                animator.Play("Walk");
+                SetAnimState(true, false, false);
                 break;
 
             case GhostState.Suspicious:
                 agent.speed = walkSpeed;
                 agent.isStopped = true;
-                animator.Play("LookAround");
+                SetAnimState(false, false, true);
                 break;
 
             case GhostState.Chase:
                 agent.speed = runSpeed;
                 agent.isStopped = false;
-                animator.Play("Run");
+                SetAnimState(false, true, false);
                 break;
 
             case GhostState.Search:
                 agent.speed = walkSpeed;
                 searchTimer = 0f;
                 agent.SetDestination(lastKnownPlayerPosition);
-                animator.Play("LookAround");
+                SetAnimState(false, false, true);
                 break;
 
             case GhostState.Return:
                 agent.speed = patrolSpeed;
                 agent.SetDestination(patrolPoints[patrolIndex].position);
-                animator.Play("Walk");
+                SetAnimState(true, false, false);
                 break;
         }
     }
@@ -269,13 +276,13 @@ public class GhostAI : MonoBehaviour
                 {
                     agent.SetPath(path);
                     agent.isStopped = false;
-                    animator.Play("Run");
+                    SetAnimState(false, true, false);
                     Debug.Log("↩ ผีเลี้ยวหลบกำแพง (Path ok)");
                 }
                 else
                 {
                     agent.isStopped = true;
-                    animator.Play("Idle");
+                    SetAnimState(false, false, false);
                     Debug.Log("🛑 ผีเลี้ยวไม่ได้ (ไม่มี NavMesh Path)");
                 }
 
@@ -306,7 +313,7 @@ public class GhostAI : MonoBehaviour
                 }
             }
 
-            animator.Play("Run");
+            SetAnimState(false, true, false);
         }
         else
         {
@@ -324,7 +331,7 @@ public class GhostAI : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 2f);
             }
 
-            animator.Play("Idle");
+            SetAnimState(false, false, false);
         }
 
         lastKnownPlayerPosition = player.position;
@@ -374,6 +381,7 @@ public class GhostAI : MonoBehaviour
             {
                 playerTargetDoor.CloseByGhost();
                 playerTargetDoor = null;
+                // justVisitedCabinet = false;
             }
         }
     }
@@ -456,7 +464,6 @@ public class GhostAI : MonoBehaviour
             {
                 playerTargetDoor.CloseByGhost();
                 playerTargetDoor = null;
-                justVisitedCabinet = false;
 
                 Debug.Log("🚪 ผีปิดประตูหลังจากออกห่างตู้แล้ว");
             }
